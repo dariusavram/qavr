@@ -15,14 +15,14 @@
         
         #container {
             display: grid;
-            grid-template-columns: 450px 1fr 350px;
+            grid-template-columns: 320px 1fr 280px;
             height: 100vh;
             gap: 0;
         }
         
         #left-panel {
             background: linear-gradient(180deg, #0a0a14 0%, #14141f 100%);
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             border-right: 2px solid #4a90e2;
             margin-top:40px;
@@ -31,18 +31,23 @@
         #canvas-container {
             position: relative;
             background: radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
         
         #right-panel {
             background: linear-gradient(180deg, #0a0a14 0%, #14141f 100%);
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             border-left: 2px solid #4a90e2;
         }
         
         h1 {
-            font-size: 28px;
-            margin: 0 0 20px 0;
+            font-size: 22px;
+            margin: 0 0 15px 0;
             background: linear-gradient(45deg, #00d4ff, #ff00ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -50,37 +55,37 @@
         }
         
         h2 {
-            font-size: 20px;
-            margin: 0 0 15px 0;
+            font-size: 18px;
+            margin: 0 0 10px 0;
             color: #00d4ff;
         }
         
         .section {
             background: rgba(40, 40, 80, 0.4);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             border: 1px solid rgba(100, 100, 200, 0.3);
             backdrop-filter: blur(10px);
         }
         
         .section h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
             color: #00d4ff;
-            font-size: 18px;
+            font-size: 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         button {
-            padding: 10px 15px;
-            margin: 5px;
+            padding: 8px 12px;
+            margin: 4px;
             background: linear-gradient(45deg, #0099ff, #0066cc);
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
@@ -172,28 +177,28 @@
         
         .syndrome-matrix {
             display: grid;
-            gap: 5px;
-            margin: 10px 0;
-            padding: 10px;
+            gap: 3px;
+            margin: 8px 0;
+            padding: 8px;
             background: rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
+            border-radius: 6px;
         }
         
         .syndrome-row {
             display: flex;
-            gap: 5px;
+            gap: 3px;
         }
         
         .syndrome-cell {
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             background: rgba(50, 50, 50, 0.5);
             border: 1px solid #444;
-            border-radius: 4px;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             transition: all 0.3s;
         }
@@ -206,30 +211,30 @@
         }
         
         .threshold-chart {
-            height: 200px;
+            height: 180px;
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid #333;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 6px;
+            padding: 8px;
             position: relative;
         }
         
         .noise-model-config {
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
         }
         
         .slider-group {
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
         .slider-group label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
+            margin-bottom: 3px;
+            font-size: 12px;
             color: #aaa;
         }
         
@@ -258,10 +263,11 @@
         }
         
         .slider-value {
-            min-width: 60px;
+            min-width: 50px;
             text-align: right;
             color: #00d4ff;
             font-weight: bold;
+            font-size: 12px;
         }
         
         #performance-chart {
@@ -306,27 +312,32 @@
         .circuit-depth-display {
             background: rgba(0, 0, 0, 0.8);
             border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
         }
         
         .depth-comparison {
             display: flex;
             align-items: center;
             justify-content: space-around;
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
         .depth-item {
             text-align: center;
         }
         
+        .depth-item h5 {
+            margin: 0 0 5px 0;
+            font-size: 13px;
+        }
+        
         .depth-bar {
-            width: 80px;
-            height: 10px;
+            width: 60px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
             margin: 5px auto;
         }
@@ -385,12 +396,13 @@
         }
         
         .tab {
-            padding: 8px 15px;
+            padding: 6px 12px;
             background: rgba(50, 50, 100, 0.3);
             border: 1px solid #444;
             border-radius: 5px 5px 0 0;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 12px;
         }
         
         .tab.active {
@@ -413,6 +425,27 @@
             margin: 2px 0;
             padding: 2px 5px;
             border-radius: 3px;
+        }
+        
+        @media (max-width: 1400px) {
+            #container {
+                grid-template-columns: 280px 1fr 250px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            #container {
+                grid-template-columns: 250px 1fr 220px;
+            }
+            
+            .button-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
         }
         
         .log-error { color: #ff6666; background: rgba(255, 0, 0, 0.1); }
@@ -503,11 +536,13 @@
             
             <div class="section">
                 <h3>🚀 Simulation Control</h3>
-                <button onclick="startBenchmark()" id="benchmark-btn">📊 Run Benchmark</button>
-                <button onclick="runSingleCycle()" id="single-cycle-btn">▶ Single QEC Cycle</button>
-                <button onclick="runContinuous()" id="continuous-btn">🔄 Continuous Mode</button>
-                <button onclick="pauseSimulation()">⏸ Pause</button>
-                <button onclick="resetSystem()" class="danger">🔄 Reset System</button>
+                <button onclick="startBenchmark()" id="benchmark-btn" style="width: 100%;">📊 Run Benchmark</button>
+                <button onclick="runSingleCycle()" id="single-cycle-btn" style="width: 100%;">▶ Single QEC Cycle</button>
+                <button onclick="runContinuous()" id="continuous-btn" style="width: 100%;">🔄 Continuous Mode</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
+                    <button onclick="pauseSimulation()">⏸ Pause</button>
+                    <button onclick="resetSystem()" class="danger">🔄 Reset</button>
+                </div>
                 
                 <div class="button-grid" style="margin-top: 10px;">
                     <button onclick="injectError('X')">X Error</button>
@@ -545,12 +580,12 @@
             <canvas id="main-canvas"></canvas>
             
             <div id="error-rate-chart">
-                <h3 style="margin: 0 0 10px 0; color: #00d4ff; font-size: 16px;">Logical Error Rate</h3>
+                <h3 style="margin: 0 0 8px 0; color: #00d4ff; font-size: 14px;">Logical Error Rate</h3>
                 <canvas id="error-chart"></canvas>
             </div>
             
             <div class="legend">
-                <h4 style="margin: 0 0 10px 0; color: #00d4ff;">Visual Elements</h4>
+                <h4 style="margin: 0 0 8px 0; color: #00d4ff; font-size: 14px;">Visual Elements</h4>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #4a90e2;"></div>
                     <span>Data Qubit |0⟩</span>
@@ -616,8 +651,8 @@
                 <div class="syndrome-matrix" id="syndrome-display">
                     <!-- Dynamically generated -->
                 </div>
-                <div style="text-align: center; margin-top: 10px;">
-                    <small style="color: #888;">X-Stabilizers | Z-Stabilizers</small>
+                <div style="text-align: center; margin-top: 8px;">
+                    <small style="color: #888; font-size: 11px;">X-Stabilizers | Z-Stabilizers</small>
                 </div>
             </div>
             
@@ -626,23 +661,23 @@
                 <div class="circuit-depth-display">
                     <div class="depth-comparison">
                         <div class="depth-item">
-                            <h5 style="color: #ff6666;">CZ Gates</h5>
+                            <h5 style="color: #ff6666; margin: 0 0 5px 0; font-size: 13px;">CZ Gates</h5>
                             <div class="depth-bar">
                                 <div class="depth-fill cz-fill" style="width: 100%"></div>
                             </div>
-                            <div style="color: #aaa; font-size: 12px;">4d timesteps</div>
+                            <div style="color: #aaa; font-size: 11px;">4d timesteps</div>
                         </div>
                         <div class="depth-item">
-                            <h5 style="color: #00ff88;">CZZ Gates</h5>
+                            <h5 style="color: #00ff88; margin: 0 0 5px 0; font-size: 13px;">CZZ Gates</h5>
                             <div class="depth-bar">
                                 <div class="depth-fill czz-fill" style="width: 50%"></div>
                             </div>
-                            <div style="color: #aaa; font-size: 12px;">2d timesteps</div>
+                            <div style="color: #aaa; font-size: 11px;">2d timesteps</div>
                         </div>
                     </div>
-                    <div style="text-align: center; margin-top: 15px;">
-                        <div style="font-size: 20px; color: #00ff88; font-weight: bold;">50% Reduction</div>
-                        <div style="color: #888; font-size: 12px;">in circuit depth</div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <div style="font-size: 18px; color: #00ff88; font-weight: bold;">50% Reduction</div>
+                        <div style="color: #888; font-size: 11px;">in circuit depth</div>
                     </div>
                 </div>
             </div>
@@ -1122,15 +1157,20 @@
                     antialias: true,
                     alpha: true
                 });
+                this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
                 this.renderer.shadowMap.enabled = true;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Make sure canvas fills container
+                this.canvas.style.width = '100%';
+                this.canvas.style.height = '100%';
             }
             
             setupCamera() {
                 const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
                 this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
-                this.camera.position.set(25, 30, 40);
+                this.camera.position.set(30, 35, 45);
                 this.camera.lookAt(0, 0, 0);
                 
                 // Mouse controls
@@ -1167,7 +1207,7 @@
                     const distance = this.camera.position.length();
                     const newDistance = distance * (1 + e.deltaY * 0.001);
                     
-                    if (newDistance > 10 && newDistance < 100) {
+                    if (newDistance > 15 && newDistance < 150) {
                         this.camera.position.multiplyScalar(newDistance / distance);
                     }
                 });
@@ -1204,18 +1244,18 @@
                 // Clear existing objects
                 this.clearScene();
                 
-                const spacing = 4;
+                const spacing = 5;
                 const codeType = quantumSystem.codeType;
                 const distance = quantumSystem.distance;
                 
                 if (codeType === 'surface') {
                     this.createSurfaceCodeLattice(quantumSystem, spacing);
                 } else if (codeType === 'color') {
-                    this.createColorCodeLattice(quantumSystem, spacing);
+                    this.createColorCodeLattice(quantumSystem, spacing * 1.2);
                 } else if (codeType === 'bacon-shor') {
                     this.createBaconShorLattice(quantumSystem, spacing);
                 } else if (codeType === 'steane') {
-                    this.createSteaneLattice(quantumSystem, spacing);
+                    this.createSteaneLattice(quantumSystem, spacing * 1.2);
                 }
                 
                 // Add base grid
@@ -1325,7 +1365,7 @@
             }
             
             createDataQubit(index, position) {
-                const geometry = new THREE.SphereGeometry(0.8, 32, 32);
+                const geometry = new THREE.SphereGeometry(1, 32, 32);
                 const material = new THREE.MeshPhongMaterial({
                     color: this.colors.dataQubit,
                     emissive: this.colors.dataQubit,
@@ -1340,7 +1380,7 @@
                 
                 // Add label
                 const label = this.createTextSprite(`D${index}`, 'white');
-                label.position.y = 2;
+                label.position.y = 2.5;
                 qubit.add(label);
                 
                 this.scene.add(qubit);
@@ -1348,7 +1388,7 @@
             }
             
             createAncillaQubit(id, position, type) {
-                const geometry = new THREE.OctahedronGeometry(0.7);
+                const geometry = new THREE.OctahedronGeometry(0.9);
                 const color = type === 'X' ? this.colors.xAncilla : this.colors.zAncilla;
                 const material = new THREE.MeshPhongMaterial({
                     color: color,
@@ -1364,7 +1404,7 @@
                 
                 // Add label
                 const label = this.createTextSprite(id, 'white');
-                label.position.y = 1.5;
+                label.position.y = 2;
                 ancilla.add(label);
                 
                 this.scene.add(ancilla);
@@ -1373,37 +1413,37 @@
             
             createTextSprite(text, color) {
                 const canvas = document.createElement('canvas');
-                canvas.width = 128;
-                canvas.height = 64;
+                canvas.width = 256;
+                canvas.height = 128;
                 const context = canvas.getContext('2d');
                 
                 context.fillStyle = color;
-                context.font = '48px Arial';
+                context.font = 'bold 64px Arial';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
-                context.fillText(text, 64, 32);
+                context.fillText(text, 128, 64);
                 
                 const texture = new THREE.CanvasTexture(canvas);
                 const material = new THREE.SpriteMaterial({ map: texture });
                 const sprite = new THREE.Sprite(material);
-                sprite.scale.set(2, 1, 1);
+                sprite.scale.set(3, 1.5, 1);
                 
                 return sprite;
             }
             
             addBaseGrid(size) {
                 // Grid helper
-                const gridHelper = new THREE.GridHelper(size * 1.5, 20, 0x404080, 0x202040);
+                const gridHelper = new THREE.GridHelper(size * 2, 30, 0x404080, 0x202040);
                 gridHelper.position.y = -0.5;
                 this.scene.add(gridHelper);
                 
                 // Coordinate axes
-                const axesHelper = new THREE.AxesHelper(size);
+                const axesHelper = new THREE.AxesHelper(size * 1.2);
                 axesHelper.position.y = -0.5;
                 this.scene.add(axesHelper);
                 
                 // Base plane
-                const planeGeometry = new THREE.PlaneGeometry(size * 2, size * 2);
+                const planeGeometry = new THREE.PlaneGeometry(size * 3, size * 3);
                 const planeMaterial = new THREE.MeshPhongMaterial({
                     color: 0x0a0a14,
                     opacity: 0.5,
@@ -1570,7 +1610,7 @@
             
             createBeam(start, end, color) {
                 const distance = start.distanceTo(end);
-                const geometry = new THREE.CylinderGeometry(0.1, 0.1, distance);
+                const geometry = new THREE.CylinderGeometry(0.15, 0.15, distance);
                 const material = new THREE.MeshPhongMaterial({
                     color: color,
                     emissive: color,
@@ -1662,8 +1702,9 @@
             }
             
             resize() {
-                const width = this.canvas.clientWidth;
-                const height = this.canvas.clientHeight;
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                const width = rect.width;
+                const height = rect.height;
                 
                 this.camera.aspect = width / height;
                 this.camera.updateProjectionMatrix();
@@ -1685,6 +1726,9 @@
         // Initialize
         function init() {
             const canvas = document.getElementById('main-canvas');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
             visualizer = new QuantumVisualizer(canvas);
             
             // Create initial quantum system
@@ -2081,14 +2125,14 @@
             // Error rate chart
             const errorCanvas = document.getElementById('error-chart');
             const errorCtx = errorCanvas.getContext('2d');
-            errorCanvas.width = 280;
-            errorCanvas.height = 150;
+            errorCanvas.width = 226;
+            errorCanvas.height = 130;
             
             // Performance chart
             const perfCanvas = document.getElementById('performance-chart');
             const perfCtx = perfCanvas.getContext('2d');
             perfCanvas.width = perfCanvas.offsetWidth;
-            perfCanvas.height = 200;
+            perfCanvas.height = 180;
         }
         
         function updatePerformanceChart() {
@@ -2102,10 +2146,10 @@
             ctx.strokeStyle = '#444';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(30, canvas.height - 30);
-            ctx.lineTo(canvas.width - 10, canvas.height - 30);
-            ctx.moveTo(30, canvas.height - 30);
-            ctx.lineTo(30, 10);
+            ctx.moveTo(25, canvas.height - 25);
+            ctx.lineTo(canvas.width - 10, canvas.height - 25);
+            ctx.moveTo(25, canvas.height - 25);
+            ctx.lineTo(25, 10);
             ctx.stroke();
             
             // Draw data if available
@@ -2114,12 +2158,12 @@
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 
-                const xScale = (canvas.width - 40) / performanceData.cycles.length;
-                const yScale = (canvas.height - 40) / Math.max(...performanceData.logicalRates);
+                const xScale = (canvas.width - 35) / performanceData.cycles.length;
+                const yScale = (canvas.height - 35) / Math.max(...performanceData.logicalRates);
                 
                 performanceData.logicalRates.forEach((rate, i) => {
-                    const x = 30 + i * xScale;
-                    const y = canvas.height - 30 - rate * yScale;
+                    const x = 25 + i * xScale;
+                    const y = canvas.height - 25 - rate * yScale;
                     
                     if (i === 0) {
                         ctx.moveTo(x, y);
@@ -2136,7 +2180,7 @@
             ctx.font = '10px Arial';
             ctx.fillText('Cycles', canvas.width / 2, canvas.height - 5);
             ctx.save();
-            ctx.translate(10, canvas.height / 2);
+            ctx.translate(8, canvas.height / 2);
             ctx.rotate(-Math.PI / 2);
             ctx.fillText('Logical Error Rate', 0, 0);
             ctx.restore();
@@ -2146,6 +2190,10 @@
             const canvas = document.getElementById('performance-chart');
             const ctx = canvas.getContext('2d');
             
+            // Update canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 180;
+            
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -2153,17 +2201,17 @@
             ctx.strokeStyle = '#444';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(40, canvas.height - 30);
-            ctx.lineTo(canvas.width - 20, canvas.height - 30);
-            ctx.moveTo(40, canvas.height - 30);
-            ctx.lineTo(40, 20);
+            ctx.moveTo(35, canvas.height - 25);
+            ctx.lineTo(canvas.width - 15, canvas.height - 25);
+            ctx.moveTo(35, canvas.height - 25);
+            ctx.lineTo(35, 15);
             ctx.stroke();
             
             if (performanceData.errorRates.length === 0) return;
             
             // Plot data
-            const xScale = (canvas.width - 60) / Math.log10(performanceData.errorRates[performanceData.errorRates.length - 1] / performanceData.errorRates[0]);
-            const yScale = (canvas.height - 50) / Math.log10(Math.max(...performanceData.logicalRates) / Math.min(...performanceData.logicalRates.filter(r => r > 0)));
+            const xScale = (canvas.width - 50) / Math.log10(performanceData.errorRates[performanceData.errorRates.length - 1] / performanceData.errorRates[0]);
+            const yScale = (canvas.height - 40) / Math.log10(Math.max(...performanceData.logicalRates) / Math.min(...performanceData.logicalRates.filter(r => r > 0)));
             
             // CZZ line
             ctx.strokeStyle = '#00ff88';
@@ -2172,8 +2220,8 @@
             
             performanceData.errorRates.forEach((rate, i) => {
                 if (performanceData.logicalRates[i] > 0) {
-                    const x = 40 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
-                    const y = canvas.height - 30 - Math.log10(performanceData.logicalRates[i] / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
+                    const x = 35 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
+                    const y = canvas.height - 25 - Math.log10(performanceData.logicalRates[i] / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
                     
                     if (i === 0) {
                         ctx.moveTo(x, y);
@@ -2192,8 +2240,8 @@
             
             performanceData.errorRates.forEach((rate, i) => {
                 if (performanceData.logicalRates[i] > 0) {
-                    const x = 40 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
-                    const y = canvas.height - 30 - Math.log10(performanceData.logicalRates[i] * 1.38 / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
+                    const x = 35 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
+                    const y = canvas.height - 25 - Math.log10(performanceData.logicalRates[i] * 1.38 / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
                     
                     if (i === 0) {
                         ctx.moveTo(x, y);
@@ -2207,26 +2255,26 @@
             
             // Labels
             ctx.fillStyle = '#888';
-            ctx.font = '12px Arial';
+            ctx.font = '11px Arial';
             ctx.fillText('Physical Error Rate', canvas.width / 2 - 40, canvas.height - 5);
             
             ctx.save();
-            ctx.translate(15, canvas.height / 2);
+            ctx.translate(12, canvas.height / 2);
             ctx.rotate(-Math.PI / 2);
             ctx.fillText('Logical Error Rate', 0, 0);
             ctx.restore();
             
             // Legend
             ctx.fillStyle = '#00ff88';
-            ctx.fillRect(canvas.width - 100, 30, 20, 3);
+            ctx.fillRect(canvas.width - 80, 25, 15, 3);
             ctx.fillStyle = '#fff';
-            ctx.font = '11px Arial';
-            ctx.fillText('CZZ Gates', canvas.width - 75, 34);
+            ctx.font = '10px Arial';
+            ctx.fillText('CZZ Gates', canvas.width - 60, 29);
             
             ctx.fillStyle = '#ff6666';
-            ctx.fillRect(canvas.width - 100, 45, 20, 3);
+            ctx.fillRect(canvas.width - 80, 38, 15, 3);
             ctx.fillStyle = '#fff';
-            ctx.fillText('CZ Gates', canvas.width - 75, 49);
+            ctx.fillText('CZ Gates', canvas.width - 60, 42);
             
             // Threshold lines
             const czzThreshold = 0.0105;
@@ -2236,16 +2284,16 @@
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            const xThresholdCZZ = 40 + Math.log10(czzThreshold / performanceData.errorRates[0]) * xScale;
-            ctx.moveTo(xThresholdCZZ, 20);
-            ctx.lineTo(xThresholdCZZ, canvas.height - 30);
+            const xThresholdCZZ = 35 + Math.log10(czzThreshold / performanceData.errorRates[0]) * xScale;
+            ctx.moveTo(xThresholdCZZ, 15);
+            ctx.lineTo(xThresholdCZZ, canvas.height - 25);
             ctx.stroke();
             
             ctx.strokeStyle = '#ff6666';
             ctx.beginPath();
-            const xThresholdCZ = 40 + Math.log10(czThreshold / performanceData.errorRates[0]) * xScale;
-            ctx.moveTo(xThresholdCZ, 20);
-            ctx.lineTo(xThresholdCZ, canvas.height - 30);
+            const xThresholdCZ = 35 + Math.log10(czThreshold / performanceData.errorRates[0]) * xScale;
+            ctx.moveTo(xThresholdCZ, 15);
+            ctx.lineTo(xThresholdCZ, canvas.height - 25);
             ctx.stroke();
             
             ctx.setLineDash([]);
