@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Quantum Error Correction System</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #container {
+            display: grid;
+            grid-template-columns: 320px 1fr 280px;
+            height: 100vh;
+            gap: 0;
+        }
+        
+        #left-panel {
+            background: linear-gradient(180deg, #0a0a14 0%, #14141f 100%);
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 2px solid #4a90e2;
+        }
+        
+        #canvas-container {
+            position: relative;
+            background: radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #right-panel {
+            background: linear-gradient(180deg, #0a0a14 0%, #14141f 100%);
+            padding: 15px;
+            overflow-y: auto;
+            border-left: 2px solid #4a90e2;
+        }
+        
+        h1 {
+            font-size: 22px;
+            margin: 0 0 15px 0;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            color: #00d4ff;
+        }
+        
+        .section {
+            background: rgba(40, 40, 80, 0.4);
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 100, 200, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section h3 {
+            margin: 0 0 8px 0;
+            color: #00d4ff;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button {
+            padding: 8px 12px;
+            margin: 4px;
+            background: linear-gradient(45deg, #0099ff, #0066cc);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 153, 255, 0.4);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+        }
+        
+        button.danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .code-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .code-option {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .code-option:hover {
+            border-color: #0099ff;
+            transform: scale(1.02);
+        }
+        
+        .code-option.selected {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .code-option h4 {
+            margin: 0 0 5px 0;
+            color: #00d4ff;
+        }
+        
+        .code-option .stats {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .metric-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin: 5px 0;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .syndrome-matrix {
+            display: grid;
+            gap: 3px;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 6px;
+        }
+        
+        .syndrome-row {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .syndrome-cell {
+            width: 24px;
+            height: 24px;
+            background: rgba(50, 50, 50, 0.5);
+            border: 1px solid #444;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .syndrome-cell.active {
+            background: rgba(255, 165, 0, 0.3);
+            border-color: #ffa500;
+            color: #ffa500;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+        }
+        
+        .threshold-chart {
+            height: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px;
+            position: relative;
+        }
+        
+        .noise-model-config {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+        
+        .slider-group {
+            margin: 8px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: rgba(100, 100, 200, 0.3);
+            outline: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00d4ff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .slider-value {
+            min-width: 50px;
+            text-align: right;
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        #performance-chart {
+            width: 100%;
+            height: 250px;
+            margin: 10px 0;
+        }
+        
+        .decoder-status {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .decoder-option {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .decoder-option.active {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .decoder-option h5 {
+            margin: 0 0 5px 0;
+            color: #00d4ff;
+            font-size: 14px;
+        }
+        
+        .decoder-option .info {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .circuit-depth-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+        
+        .depth-comparison {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 8px 0;
+        }
+        
+        .depth-item {
+            text-align: center;
+        }
+        
+        .depth-item h5 {
+            margin: 0 0 5px 0;
+            font-size: 13px;
+        }
+        
+        .depth-bar {
+            width: 60px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px auto;
+        }
+        
+        .depth-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .cz-fill { background: linear-gradient(90deg, #ff6666, #ff9999); }
+        .czz-fill { background: linear-gradient(90deg, #00ff88, #66ffbb); }
+        
+        #error-rate-chart {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid #0099ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 40, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0099ff;
+            backdrop-filter: blur(10px);
+            max-width: 250px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .tab-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 6px 12px;
+            background: rgba(50, 50, 100, 0.3);
+            border: 1px solid #444;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .tab.active {
+            background: rgba(0, 150, 255, 0.3);
+            border-color: #0099ff;
+        }
+        
+        .log-container {
+            height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 0 8px 8px 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 1400px) {
+            #container {
+                grid-template-columns: 280px 1fr 250px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            #container {
+                grid-template-columns: 250px 1fr 220px;
+            }
+            
+            .button-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+        
+        .log-error { color: #ff6666; background: rgba(255, 0, 0, 0.1); }
+        .log-success { color: #00ff88; background: rgba(0, 255, 0, 0.1); }
+        .log-info { color: #0099ff; }
+        .log-warning { color: #ffa500; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="left-panel">
+            <h1>Advanced QEC System</h1>
+            
+            <div class="section">
+                <h3>🎯 Quantum Code Selection</h3>
+                <div class="code-selector">
+                    <div class="code-option selected" onclick="selectCode('surface')" id="surface-code">
+                        <h4>Surface Code</h4>
+                        <div class="stats">Distance: 3-9<br>Threshold: 1.05%</div>
+                    </div>
+                    <div class="code-option" onclick="selectCode('color')" id="color-code">
+                        <h4>Color Code</h4>
+                        <div class="stats">Distance: 3-7<br>Threshold: 0.8%</div>
+                    </div>
+                    <div class="code-option" onclick="selectCode('bacon-shor')" id="bacon-shor-code">
+                        <h4>Bacon-Shor</h4>
+                        <div class="stats">9-qubit<br>Threshold: 0.6%</div>
+                    </div>
+                    <div class="code-option" onclick="selectCode('steane')" id="steane-code">
+                        <h4>Steane Code</h4>
+                        <div class="stats">[[7,1,3]]<br>CSS Code</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>⚙️ Code Parameters</h3>
+                <div class="slider-group">
+                    <label>Code Distance</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="distance-slider" min="3" max="9" value="5" step="2">
+                        <span class="slider-value" id="distance-value">5</span>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label>Measurement Rounds</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="rounds-slider" min="1" max="10" value="3" step="1">
+                        <span class="slider-value" id="rounds-value">3</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🎲 Noise Model Configuration</h3>
+                <div class="noise-model-config">
+                    <div class="slider-group">
+                        <label>Gate Error Rate (p)</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="gate-error-slider" min="0" max="50" value="10" step="1">
+                            <span class="slider-value" id="gate-error-value">0.1%</span>
+                        </div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Measurement Error Rate</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="measurement-error-slider" min="0" max="100" value="20" step="1">
+                            <span class="slider-value" id="measurement-error-value">0.2%</span>
+                        </div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Idle Error Rate</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="idle-error-slider" min="0" max="20" value="5" step="1">
+                            <span class="slider-value" id="idle-error-value">0.05%</span>
+                        </div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Two-Qubit Correlated Errors</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="correlated-slider" min="0" max="50" value="10" step="1">
+                            <span class="slider-value" id="correlated-value">10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🚀 Simulation Control</h3>
+                <button onclick="startBenchmark()" id="benchmark-btn" style="width: 100%;">📊 Run Benchmark</button>
+                <button onclick="runSingleCycle()" id="single-cycle-btn" style="width: 100%;">▶ Single QEC Cycle</button>
+                <button onclick="runContinuous()" id="continuous-btn" style="width: 100%;">🔄 Continuous Mode</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
+                    <button onclick="pauseSimulation()">⏸ Pause</button>
+                    <button onclick="resetSystem()" class="danger">🔄 Reset</button>
+                </div>
+                
+                <div class="button-grid" style="margin-top: 10px;">
+                    <button onclick="injectError('X')">X Error</button>
+                    <button onclick="injectError('Y')">Y Error</button>
+                    <button onclick="injectError('Z')">Z Error</button>
+                    <button onclick="injectCorrelatedError()">XX Error</button>
+                    <button onclick="injectCorrelatedError('YY')">YY Error</button>
+                    <button onclick="injectCorrelatedError('ZZ')">ZZ Error</button>
+                    <button onclick="injectMeasurementError()">M Error</button>
+                    <button onclick="injectLogicalError()">L Error</button>
+                    <button onclick="injectRandomErrors()">Random</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🧮 Decoder Selection</h3>
+                <div class="decoder-status">
+                    <div class="decoder-option active" onclick="selectDecoder('lookup')" id="lookup-decoder">
+                        <h5>Lookup Table</h5>
+                        <div class="info">Fast, d≤5</div>
+                    </div>
+                    <div class="decoder-option" onclick="selectDecoder('mwpm')" id="mwpm-decoder">
+                        <h5>MWPM</h5>
+                        <div class="info">Optimal</div>
+                    </div>
+                    <div class="decoder-option" onclick="selectDecoder('union-find')" id="union-find-decoder">
+                        <h5>Union-Find</h5>
+                        <div class="info">Fast, approx</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+            
+            <div id="error-rate-chart">
+                <h3 style="margin: 0 0 8px 0; color: #00d4ff; font-size: 14px;">Logical Error Rate</h3>
+                <canvas id="error-chart"></canvas>
+            </div>
+            
+            <div class="legend">
+                <h4 style="margin: 0 0 8px 0; color: #00d4ff; font-size: 14px;">Visual Elements</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4a90e2;"></div>
+                    <span>Data Qubit |0⟩</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6666;"></div>
+                    <span>X/Y Error</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #6666ff;"></div>
+                    <span>Z Error</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e94560;"></div>
+                    <span>X-Ancilla</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9b59b6;"></div>
+                    <span>Z-Ancilla</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00ff88;"></div>
+                    <span>Measurement</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffa500;"></div>
+                    <span>Syndrome Flag</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff00ff;"></div>
+                    <span>Correction</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="right-panel">
+            <h2>System Analysis</h2>
+            
+            <div class="section">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Logical Error Rate</div>
+                        <div class="metric-value" id="logical-rate">0.000</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Physical Qubits</div>
+                        <div class="metric-value" id="physical-qubits">25</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">QEC Cycles</div>
+                        <div class="metric-value" id="qec-cycles">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Success Rate</div>
+                        <div class="metric-value" id="success-rate">100%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🔬 Syndrome Analysis</h3>
+                <div class="syndrome-matrix" id="syndrome-display">
+                    <!-- Dynamically generated -->
+                </div>
+                <div style="text-align: center; margin-top: 8px;">
+                    <small style="color: #888; font-size: 11px;">X-Stabilizers | Z-Stabilizers</small>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>⚡ Circuit Depth Comparison</h3>
+                <div class="circuit-depth-display">
+                    <div class="depth-comparison">
+                        <div class="depth-item">
+                            <h5 style="color: #ff6666; margin: 0 0 5px 0; font-size: 13px;">CZ Gates</h5>
+                            <div class="depth-bar">
+                                <div class="depth-fill cz-fill" style="width: 100%"></div>
+                            </div>
+                            <div style="color: #aaa; font-size: 11px;">4d timesteps</div>
+                        </div>
+                        <div class="depth-item">
+                            <h5 style="color: #00ff88; margin: 0 0 5px 0; font-size: 13px;">CZZ Gates</h5>
+                            <div class="depth-bar">
+                                <div class="depth-fill czz-fill" style="width: 50%"></div>
+                            </div>
+                            <div style="color: #aaa; font-size: 11px;">2d timesteps</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <div style="font-size: 18px; color: #00ff88; font-weight: bold;">50% Reduction</div>
+                        <div style="color: #888; font-size: 11px;">in circuit depth</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>📈 Threshold Analysis</h3>
+                <canvas id="performance-chart"></canvas>
+            </div>
+            
+            <div class="section">
+                <h3>💻 System Log</h3>
+                <div class="tab-container">
+                    <div class="tab active" onclick="showLog('all')">All</div>
+                    <div class="tab" onclick="showLog('errors')">Errors</div>
+                    <div class="tab" onclick="showLog('corrections')">Corrections</div>
+                    <div class="tab" onclick="showLog('measurements')">Measurements</div>
+                </div>
+                <div class="log-container" id="system-log"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Advanced Quantum System
+        class AdvancedQuantumSystem {
+            constructor(codeType = 'surface', distance = 5) {
+                this.codeType = codeType;
+                this.distance = distance;
+                this.setupCode();
+                
+                // Error tracking
+                this.errors = new Map();
+                this.syndromeHistory = [];
+                this.measurementErrors = new Map();
+                this.logicalErrors = 0;
+                this.totalCycles = 0;
+                this.successfulCorrections = 0;
+                
+                // Noise parameters
+                this.noiseModel = {
+                    gateError: 0.001,
+                    measurementError: 0.002,
+                    idleError: 0.0005,
+                    correlatedErrorRate: 0.1,
+                    twoQubitGateError: 0.01
+                };
+                
+                // Decoder
+                this.decoderType = 'lookup';
+                this.decoderStats = {
+                    lookupTableHits: 0,
+                    decodingTime: 0,
+                    failures: 0
+                };
+            }
+            
+            setupCode() {
+                switch (this.codeType) {
+                    case 'surface':
+                        this.setupSurfaceCode();
+                        break;
+                    case 'color':
+                        this.setupColorCode();
+                        break;
+                    case 'bacon-shor':
+                        this.setupBaconShorCode();
+                        break;
+                    case 'steane':
+                        this.setupSteaneCode();
+                        break;
+                }
+            }
+            
+            setupSurfaceCode() {
+                // Surface code parameters
+                this.numDataQubits = this.distance * this.distance;
+                this.numXAncillas = Math.floor((this.distance - 1) * (this.distance - 1) / 2);
+                this.numZAncillas = Math.floor((this.distance - 1) * (this.distance - 1) / 2);
+                this.numAncillas = this.numXAncillas + this.numZAncillas;
+                
+                // Generate stabilizer generators
+                this.generateSurfaceCodeStabilizers();
+                
+                // Logical operators
+                this.logicalX = [];
+                this.logicalZ = [];
+                for (let i = 0; i < this.distance; i++) {
+                    this.logicalX.push(i); // Top row
+                    this.logicalZ.push(i * this.distance); // Left column
+                }
+            }
+            
+            generateSurfaceCodeStabilizers() {
+                this.xStabilizers = [];
+                this.zStabilizers = [];
+                
+                // Generate plaquette operators
+                for (let row = 0; row < this.distance - 1; row++) {
+                    for (let col = 0; col < this.distance - 1; col++) {
+                        if ((row + col) % 2 === 0) {
+                            // X-stabilizer
+                            const stabilizer = [];
+                            stabilizer.push(row * this.distance + col);
+                            stabilizer.push(row * this.distance + col + 1);
+                            stabilizer.push((row + 1) * this.distance + col);
+                            stabilizer.push((row + 1) * this.distance + col + 1);
+                            this.xStabilizers.push(stabilizer);
+                        } else {
+                            // Z-stabilizer
+                            const stabilizer = [];
+                            stabilizer.push(row * this.distance + col);
+                            stabilizer.push(row * this.distance + col + 1);
+                            stabilizer.push((row + 1) * this.distance + col);
+                            stabilizer.push((row + 1) * this.distance + col + 1);
+                            this.zStabilizers.push(stabilizer);
+                        }
+                    }
+                }
+            }
+            
+            setupColorCode() {
+                // 7-qubit color code
+                this.numDataQubits = 7;
+                this.numAncillas = 3;
+                
+                this.xStabilizers = [
+                    [0, 1, 2, 3],
+                    [0, 3, 4, 5],
+                    [0, 5, 6, 1]
+                ];
+                
+                this.zStabilizers = this.xStabilizers; // CSS code
+                this.logicalX = [1, 2, 3, 4, 5, 6];
+                this.logicalZ = [1, 2, 3, 4, 5, 6];
+            }
+            
+            setupBaconShorCode() {
+                // 9-qubit Bacon-Shor code
+                this.numDataQubits = 9;
+                this.numAncillas = 4;
+                
+                this.xStabilizers = [
+                    [0, 1], [1, 2], [3, 4], [4, 5], [6, 7], [7, 8]
+                ];
+                
+                this.zStabilizers = [
+                    [0, 3], [3, 6], [1, 4], [4, 7], [2, 5], [5, 8]
+                ];
+                
+                this.logicalX = [0, 1, 2];
+                this.logicalZ = [0, 3, 6];
+            }
+            
+            setupSteaneCode() {
+                // [[7,1,3]] Steane code
+                this.numDataQubits = 7;
+                this.numAncillas = 6;
+                
+                // Parity check matrix
+                this.H = [
+                    [1, 0, 1, 0, 1, 0, 1],
+                    [0, 1, 1, 0, 0, 1, 1],
+                    [0, 0, 0, 1, 1, 1, 1]
+                ];
+                
+                this.xStabilizers = this.H.map(row => 
+                    row.map((bit, idx) => bit === 1 ? idx : -1).filter(idx => idx >= 0)
+                );
+                
+                this.zStabilizers = this.xStabilizers; // CSS code
+                this.logicalX = [0, 1, 2, 3, 4, 5, 6];
+                this.logicalZ = [0, 1, 2, 3, 4, 5, 6];
+            }
+            
+            injectError(type, position = null, correlated = false) {
+                if (position === null) {
+                    position = Math.floor(Math.random() * this.numDataQubits);
+                }
+                
+                if (correlated && position < this.numDataQubits - 1) {
+                    // Two-qubit correlated error
+                    this.errors.set(position, type);
+                    this.errors.set(position + 1, type);
+                    log(`CORRELATED ERROR: ${type}${type} on qubits ${position},${position + 1}`, 'error');
+                } else {
+                    // Single-qubit error
+                    const currentError = this.errors.get(position);
+                    const newError = this.pauliMultiply(currentError, type);
+                    
+                    if (newError === 'I') {
+                        this.errors.delete(position);
+                    } else {
+                        this.errors.set(position, newError);
+                    }
+                    
+                    log(`ERROR: ${type} on qubit ${position}`, 'error');
+                }
+            }
+            
+            pauliMultiply(p1, p2) {
+                if (!p1) return p2;
+                if (!p2) return p1;
+                
+                const table = {
+                    'XX': 'I', 'XY': 'Z', 'XZ': 'Y',
+                    'YX': 'Z', 'YY': 'I', 'YZ': 'X',
+                    'ZX': 'Y', 'ZY': 'X', 'ZZ': 'I'
+                };
+                
+                return table[p1 + p2] || 'I';
+            }
+            
+            measureStabilizers(round = 0) {
+                const xSyndrome = new Array(this.xStabilizers.length).fill(0);
+                const zSyndrome = new Array(this.zStabilizers.length).fill(0);
+                
+                // Measure X-stabilizers (detect Z errors)
+                this.xStabilizers.forEach((stabilizer, idx) => {
+                    let parity = 0;
+                    stabilizer.forEach(qubitIdx => {
+                        const error = this.errors.get(qubitIdx);
+                        if (error === 'Z' || error === 'Y') {
+                            parity ^= 1;
+                        }
+                    });
+                    
+                    // Add measurement error
+                    if (Math.random() < this.noiseModel.measurementError) {
+                        parity ^= 1;
+                        this.measurementErrors.set(`X${idx}_${round}`, true);
+                    }
+                    
+                    xSyndrome[idx] = parity;
+                });
+                
+                // Measure Z-stabilizers (detect X errors)
+                this.zStabilizers.forEach((stabilizer, idx) => {
+                    let parity = 0;
+                    stabilizer.forEach(qubitIdx => {
+                        const error = this.errors.get(qubitIdx);
+                        if (error === 'X' || error === 'Y') {
+                            parity ^= 1;
+                        }
+                    });
+                    
+                    // Add measurement error
+                    if (Math.random() < this.noiseModel.measurementError) {
+                        parity ^= 1;
+                        this.measurementErrors.set(`Z${idx}_${round}`, true);
+                    }
+                    
+                    zSyndrome[idx] = parity;
+                });
+                
+                const syndrome = { x: xSyndrome, z: zSyndrome, round };
+                this.syndromeHistory.push(syndrome);
+                
+                log(`SYNDROME: X=[${xSyndrome}] Z=[${zSyndrome}]`, 'info');
+                return syndrome;
+            }
+            
+            decode(syndromeHistory) {
+                const startTime = performance.now();
+                let result = null;
+                
+                switch (this.decoderType) {
+                    case 'lookup':
+                        result = this.lookupTableDecode(syndromeHistory);
+                        break;
+                    case 'mwpm':
+                        result = this.mwpmDecode(syndromeHistory);
+                        break;
+                    case 'union-find':
+                        result = this.unionFindDecode(syndromeHistory);
+                        break;
+                }
+                
+                this.decoderStats.decodingTime = performance.now() - startTime;
+                return result;
+            }
+            
+            lookupTableDecode(syndromeHistory) {
+                if (this.distance > 5) {
+                    log('Lookup table decoder only works for d≤5', 'warning');
+                    return this.mwpmDecode(syndromeHistory);
+                }
+                
+                const lastSyndrome = syndromeHistory[syndromeHistory.length - 1];
+                const syndromeString = [...lastSyndrome.x, ...lastSyndrome.z].join('');
+                
+                // Pre-computed lookup table for common syndromes
+                const lookupTable = this.getLookupTable();
+                const correction = lookupTable[syndromeString];
+                
+                if (correction) {
+                    this.decoderStats.lookupTableHits++;
+                    return correction;
+                }
+                
+                // Fallback to MWPM
+                return this.mwpmDecode(syndromeHistory);
+            }
+            
+            mwpmDecode(syndromeHistory) {
+                // Simplified MWPM decoder
+                const corrections = [];
+                const lastSyndrome = syndromeHistory[syndromeHistory.length - 1];
+                
+                // Find single-qubit corrections for X errors
+                lastSyndrome.z.forEach((bit, idx) => {
+                    if (bit === 1) {
+                        const stabilizer = this.zStabilizers[idx];
+                        // Choose minimum weight correction
+                        const qubitIdx = stabilizer[0];
+                        corrections.push({ qubit: qubitIdx, type: 'X' });
+                    }
+                });
+                
+                // Find single-qubit corrections for Z errors
+                lastSyndrome.x.forEach((bit, idx) => {
+                    if (bit === 1) {
+                        const stabilizer = this.xStabilizers[idx];
+                        const qubitIdx = stabilizer[0];
+                        corrections.push({ qubit: qubitIdx, type: 'Z' });
+                    }
+                });
+                
+                return corrections;
+            }
+            
+            unionFindDecode(syndromeHistory) {
+                // Simplified Union-Find decoder
+                // Similar to MWPM but uses growth algorithm
+                return this.mwpmDecode(syndromeHistory);
+            }
+            
+            getLookupTable() {
+                // Pre-computed syndrome-to-correction mapping
+                // This would be generated based on the specific code
+                return {
+                    '1000000': [{ qubit: 0, type: 'X' }],
+                    '0100000': [{ qubit: 1, type: 'X' }],
+                    '0010000': [{ qubit: 2, type: 'X' }],
+                    '0001000': [{ qubit: 0, type: 'Z' }],
+                    '0000100': [{ qubit: 1, type: 'Z' }],
+                    '0000010': [{ qubit: 2, type: 'Z' }],
+                    // ... more entries
+                };
+            }
+            
+            applyCorrections(corrections) {
+                corrections.forEach(({ qubit, type }) => {
+                    const currentError = this.errors.get(qubit);
+                    const newError = this.pauliMultiply(currentError, type);
+                    
+                    if (newError === 'I') {
+                        this.errors.delete(qubit);
+                        this.successfulCorrections++;
+                    } else {
+                        this.errors.set(qubit, newError);
+                    }
+                    
+                    log(`CORRECTION: Applied ${type} to qubit ${qubit}`, 'success');
+                });
+            }
+            
+            checkLogicalError() {
+                // Check if remaining errors form a logical operator
+                const errorQubits = Array.from(this.errors.keys());
+                
+                // Check X logical
+                const xLogicalError = this.logicalX.every(q => errorQubits.includes(q));
+                
+                // Check Z logical
+                const zLogicalError = this.logicalZ.every(q => errorQubits.includes(q));
+                
+                if (xLogicalError || zLogicalError) {
+                    this.logicalErrors++;
+                    log(`LOGICAL ERROR DETECTED!`, 'error');
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            runQECRound(rounds = 3) {
+                this.totalCycles++;
+                this.syndromeHistory = [];
+                
+                log(`=== QEC ROUND ${this.totalCycles} START ===`, 'info');
+                
+                // Multiple rounds of syndrome extraction
+                for (let r = 0; r < rounds; r++) {
+                    this.measureStabilizers(r);
+                    
+                    // Idle errors between rounds
+                    this.applyIdleErrors();
+                }
+                
+                // Decode
+                const corrections = this.decode(this.syndromeHistory);
+                
+                // Apply corrections
+                if (corrections && corrections.length > 0) {
+                    this.applyCorrections(corrections);
+                }
+                
+                // Check for logical errors
+                const hasLogicalError = this.checkLogicalError();
+                
+                log(`=== QEC ROUND ${this.totalCycles} END ===`, 'info');
+                
+                return {
+                    success: !hasLogicalError,
+                    corrections: corrections || [],
+                    syndromeHistory: this.syndromeHistory,
+                    decoderStats: this.decoderStats
+                };
+            }
+            
+            applyIdleErrors() {
+                for (let i = 0; i < this.numDataQubits; i++) {
+                    if (Math.random() < this.noiseModel.idleError) {
+                        const errorType = ['X', 'Y', 'Z'][Math.floor(Math.random() * 3)];
+                        this.injectError(errorType, i);
+                    }
+                }
+            }
+            
+            getLogicalErrorRate() {
+                if (this.totalCycles === 0) return 0;
+                return this.logicalErrors / this.totalCycles;
+            }
+            
+            getMetrics() {
+                return {
+                    physicalQubits: this.numDataQubits + this.numAncillas,
+                    logicalErrorRate: this.getLogicalErrorRate(),
+                    successRate: this.totalCycles > 0 ? 
+                        ((this.totalCycles - this.logicalErrors) / this.totalCycles * 100).toFixed(1) : 100,
+                    decoderPerformance: this.decoderStats,
+                    activeErrors: this.errors.size,
+                    totalCycles: this.totalCycles
+                };
+            }
+        }
+        
+        // Visualization System
+        class QuantumVisualizer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.scene = new THREE.Scene();
+                this.setupRenderer();
+                this.setupCamera();
+                this.setupLights();
+                this.objects = new Map();
+                this.animations = [];
+                
+                // Visual parameters
+                this.colors = {
+                    dataQubit: 0x4a90e2,
+                    xError: 0xff6666,
+                    zError: 0x6666ff,
+                    yError: 0xff66ff,
+                    xAncilla: 0xe94560,
+                    zAncilla: 0x9b59b6,
+                    measurement: 0x00ff88,
+                    syndrome: 0xffa500,
+                    correction: 0xff00ff
+                };
+            }
+            
+            setupRenderer() {
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: this.canvas,
+                    antialias: true,
+                    alpha: true
+                });
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Make sure canvas fills container
+                this.canvas.style.width = '100%';
+                this.canvas.style.height = '100%';
+            }
+            
+            setupCamera() {
+                const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+                this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
+                this.camera.position.set(30, 35, 45);
+                this.camera.lookAt(0, 0, 0);
+                
+                // Mouse controls
+                this.setupControls();
+            }
+            
+            setupControls() {
+                let mouseDown = false;
+                let mouseX = 0, mouseY = 0;
+                
+                this.canvas.addEventListener('mousedown', () => mouseDown = true);
+                this.canvas.addEventListener('mouseup', () => mouseDown = false);
+                this.canvas.addEventListener('mouseleave', () => mouseDown = false);
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (!mouseDown) return;
+                    
+                    const deltaX = e.movementX * 0.01;
+                    const deltaY = e.movementY * 0.01;
+                    
+                    const spherical = new THREE.Spherical();
+                    spherical.setFromVector3(this.camera.position);
+                    
+                    spherical.theta -= deltaX;
+                    spherical.phi += deltaY;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                    
+                    this.camera.position.setFromSpherical(spherical);
+                    this.camera.lookAt(0, 0, 0);
+                });
+                
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const distance = this.camera.position.length();
+                    const newDistance = distance * (1 + e.deltaY * 0.001);
+                    
+                    if (newDistance > 15 && newDistance < 150) {
+                        this.camera.position.multiplyScalar(newDistance / distance);
+                    }
+                });
+            }
+            
+            setupLights() {
+                // Ambient light
+                const ambient = new THREE.AmbientLight(0x404080, 0.4);
+                this.scene.add(ambient);
+                
+                // Main directional light
+                const directional = new THREE.DirectionalLight(0xffffff, 0.8);
+                directional.position.set(20, 40, 20);
+                directional.castShadow = true;
+                directional.shadow.camera.near = 0.1;
+                directional.shadow.camera.far = 100;
+                directional.shadow.camera.left = -30;
+                directional.shadow.camera.right = 30;
+                directional.shadow.camera.top = 30;
+                directional.shadow.camera.bottom = -30;
+                this.scene.add(directional);
+                
+                // Color accent lights
+                const blueLight = new THREE.PointLight(0x0099ff, 0.5, 50);
+                blueLight.position.set(-20, 20, -20);
+                this.scene.add(blueLight);
+                
+                const redLight = new THREE.PointLight(0xff0066, 0.3, 50);
+                redLight.position.set(20, 20, 20);
+                this.scene.add(redLight);
+            }
+            
+            createLattice(quantumSystem) {
+                // Clear existing objects
+                this.clearScene();
+                
+                const spacing = 5;
+                const codeType = quantumSystem.codeType;
+                const distance = quantumSystem.distance;
+                
+                if (codeType === 'surface') {
+                    this.createSurfaceCodeLattice(quantumSystem, spacing);
+                } else if (codeType === 'color') {
+                    this.createColorCodeLattice(quantumSystem, spacing * 1.2);
+                } else if (codeType === 'bacon-shor') {
+                    this.createBaconShorLattice(quantumSystem, spacing);
+                } else if (codeType === 'steane') {
+                    this.createSteaneLattice(quantumSystem, spacing * 1.2);
+                }
+                
+                // Add base grid
+                this.addBaseGrid(distance * spacing);
+            }
+            
+            createSurfaceCodeLattice(system, spacing) {
+                const distance = system.distance;
+                const offset = (distance - 1) * spacing / 2;
+                
+                // Create data qubits
+                for (let row = 0; row < distance; row++) {
+                    for (let col = 0; col < distance; col++) {
+                        const index = row * distance + col;
+                        const position = new THREE.Vector3(
+                            col * spacing - offset,
+                            0,
+                            row * spacing - offset
+                        );
+                        
+                        this.createDataQubit(index, position);
+                    }
+                }
+                
+                // Create ancilla qubits
+                let xAncillaIndex = 0;
+                let zAncillaIndex = 0;
+                
+                for (let row = 0; row < distance - 1; row++) {
+                    for (let col = 0; col < distance - 1; col++) {
+                        const position = new THREE.Vector3(
+                            col * spacing + spacing/2 - offset,
+                            3,
+                            row * spacing + spacing/2 - offset
+                        );
+                        
+                        if ((row + col) % 2 === 0) {
+                            this.createAncillaQubit(`X${xAncillaIndex}`, position, 'X');
+                            xAncillaIndex++;
+                        } else {
+                            this.createAncillaQubit(`Z${zAncillaIndex}`, position, 'Z');
+                            zAncillaIndex++;
+                        }
+                    }
+                }
+            }
+            
+            createColorCodeLattice(system, spacing) {
+                // 7-qubit color code hexagonal layout
+                const positions = [
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(spacing, 0, 0),
+                    new THREE.Vector3(spacing/2, 0, spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(-spacing/2, 0, spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(-spacing, 0, 0),
+                    new THREE.Vector3(-spacing/2, 0, -spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(spacing/2, 0, -spacing * Math.sqrt(3)/2)
+                ];
+                
+                positions.forEach((pos, idx) => {
+                    this.createDataQubit(idx, pos);
+                });
+                
+                // Create stabilizer ancillas
+                this.createAncillaQubit('X0', new THREE.Vector3(0, 3, spacing * Math.sqrt(3)/3), 'X');
+                this.createAncillaQubit('X1', new THREE.Vector3(-spacing/2, 3, -spacing * Math.sqrt(3)/3), 'X');
+                this.createAncillaQubit('X2', new THREE.Vector3(spacing/2, 3, -spacing * Math.sqrt(3)/3), 'X');
+            }
+            
+            createBaconShorLattice(system, spacing) {
+                // 3x3 grid for Bacon-Shor
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        const index = row * 3 + col;
+                        const position = new THREE.Vector3(
+                            (col - 1) * spacing,
+                            0,
+                            (row - 1) * spacing
+                        );
+                        
+                        this.createDataQubit(index, position);
+                    }
+                }
+                
+                // Create gauge qubits
+                this.createAncillaQubit('X0', new THREE.Vector3(0, 3, -spacing * 1.5), 'X');
+                this.createAncillaQubit('X1', new THREE.Vector3(0, 3, spacing * 1.5), 'X');
+                this.createAncillaQubit('Z0', new THREE.Vector3(-spacing * 1.5, 3, 0), 'Z');
+                this.createAncillaQubit('Z1', new THREE.Vector3(spacing * 1.5, 3, 0), 'Z');
+            }
+            
+            createSteaneLattice(system, spacing) {
+                // Triangular lattice for Steane code
+                const positions = [
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(spacing, 0, 0),
+                    new THREE.Vector3(spacing/2, 0, spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(-spacing/2, 0, spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(-spacing, 0, 0),
+                    new THREE.Vector3(-spacing/2, 0, -spacing * Math.sqrt(3)/2),
+                    new THREE.Vector3(spacing/2, 0, -spacing * Math.sqrt(3)/2)
+                ];
+                
+                positions.forEach((pos, idx) => {
+                    this.createDataQubit(idx, pos);
+                });
+            }
+            
+            createDataQubit(index, position) {
+                const geometry = new THREE.SphereGeometry(1, 32, 32);
+                const material = new THREE.MeshPhongMaterial({
+                    color: this.colors.dataQubit,
+                    emissive: this.colors.dataQubit,
+                    emissiveIntensity: 0.2,
+                    shininess: 100
+                });
+                
+                const qubit = new THREE.Mesh(geometry, material);
+                qubit.position.copy(position);
+                qubit.castShadow = true;
+                qubit.receiveShadow = true;
+                
+                // Add label
+                const label = this.createTextSprite(`D${index}`, 'white');
+                label.position.y = 2.5;
+                qubit.add(label);
+                
+                this.scene.add(qubit);
+                this.objects.set(`data_${index}`, qubit);
+            }
+            
+            createAncillaQubit(id, position, type) {
+                const geometry = new THREE.OctahedronGeometry(0.9);
+                const color = type === 'X' ? this.colors.xAncilla : this.colors.zAncilla;
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.3,
+                    shininess: 100
+                });
+                
+                const ancilla = new THREE.Mesh(geometry, material);
+                ancilla.position.copy(position);
+                ancilla.castShadow = true;
+                ancilla.receiveShadow = true;
+                
+                // Add label
+                const label = this.createTextSprite(id, 'white');
+                label.position.y = 2;
+                ancilla.add(label);
+                
+                this.scene.add(ancilla);
+                this.objects.set(`ancilla_${id}`, ancilla);
+            }
+            
+            createTextSprite(text, color) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 128;
+                const context = canvas.getContext('2d');
+                
+                context.fillStyle = color;
+                context.font = 'bold 64px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, 128, 64);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(3, 1.5, 1);
+                
+                return sprite;
+            }
+            
+            addBaseGrid(size) {
+                // Grid helper
+                const gridHelper = new THREE.GridHelper(size * 2, 30, 0x404080, 0x202040);
+                gridHelper.position.y = -0.5;
+                this.scene.add(gridHelper);
+                
+                // Coordinate axes
+                const axesHelper = new THREE.AxesHelper(size * 1.2);
+                axesHelper.position.y = -0.5;
+                this.scene.add(axesHelper);
+                
+                // Base plane
+                const planeGeometry = new THREE.PlaneGeometry(size * 3, size * 3);
+                const planeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x0a0a14,
+                    opacity: 0.5,
+                    transparent: true
+                });
+                const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.rotation.x = -Math.PI / 2;
+                plane.position.y = -0.6;
+                plane.receiveShadow = true;
+                this.scene.add(plane);
+            }
+            
+            updateQubitStates(errors) {
+                // Reset all qubits
+                this.objects.forEach((obj, key) => {
+                    if (key.startsWith('data_')) {
+                        obj.material.color.setHex(this.colors.dataQubit);
+                        obj.material.emissive.setHex(this.colors.dataQubit);
+                        obj.material.emissiveIntensity = 0.2;
+                    }
+                });
+                
+                // Update error states
+                errors.forEach((errorType, qubitIndex) => {
+                    const qubit = this.objects.get(`data_${qubitIndex}`);
+                    if (qubit) {
+                        let color;
+                        switch (errorType) {
+                            case 'X': color = this.colors.xError; break;
+                            case 'Y': color = this.colors.yError; break;
+                            case 'Z': color = this.colors.zError; break;
+                        }
+                        
+                        qubit.material.color.setHex(color);
+                        qubit.material.emissive.setHex(color);
+                        qubit.material.emissiveIntensity = 0.5;
+                        
+                        // Add error indicator
+                        this.addErrorIndicator(qubit, errorType);
+                    }
+                });
+            }
+            
+            addErrorIndicator(qubit, errorType) {
+                const geometry = new THREE.TorusGeometry(1.2, 0.2, 8, 16);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const indicator = new THREE.Mesh(geometry, material);
+                indicator.position.copy(qubit.position);
+                this.scene.add(indicator);
+                
+                // Animate
+                this.animations.push({
+                    object: indicator,
+                    type: 'error',
+                    startTime: Date.now(),
+                    duration: 1000
+                });
+            }
+            
+            showMeasurement(ancillaId, connectedQubits, measurementType) {
+                const ancilla = this.objects.get(`ancilla_${ancillaId}`);
+                if (!ancilla) return;
+                
+                connectedQubits.forEach(qubitIdx => {
+                    const dataQubit = this.objects.get(`data_${qubitIdx}`);
+                    if (!dataQubit) return;
+                    
+                    // Create measurement beam
+                    const beam = this.createBeam(
+                        ancilla.position,
+                        dataQubit.position,
+                        this.colors.measurement
+                    );
+                    
+                    this.scene.add(beam);
+                    
+                    this.animations.push({
+                        object: beam,
+                        type: 'measurement',
+                        startTime: Date.now(),
+                        duration: 500
+                    });
+                });
+            }
+            
+            showSyndrome(syndromeData) {
+                // Show X-syndrome
+                syndromeData.x.forEach((bit, idx) => {
+                    if (bit === 1) {
+                        const ancilla = this.objects.get(`ancilla_X${idx}`);
+                        if (ancilla) {
+                            this.addSyndromeIndicator(ancilla);
+                        }
+                    }
+                });
+                
+                // Show Z-syndrome
+                syndromeData.z.forEach((bit, idx) => {
+                    if (bit === 1) {
+                        const ancilla = this.objects.get(`ancilla_Z${idx}`);
+                        if (ancilla) {
+                            this.addSyndromeIndicator(ancilla);
+                        }
+                    }
+                });
+            }
+            
+            addSyndromeIndicator(ancilla) {
+                const geometry = new THREE.SphereGeometry(1.5, 16, 16);
+                const material = new THREE.MeshPhongMaterial({
+                    color: this.colors.syndrome,
+                    emissive: this.colors.syndrome,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.5
+                });
+                
+                const indicator = new THREE.Mesh(geometry, material);
+                indicator.position.copy(ancilla.position);
+                this.scene.add(indicator);
+                
+                this.animations.push({
+                    object: indicator,
+                    type: 'syndrome',
+                    startTime: Date.now(),
+                    duration: 1500
+                });
+            }
+            
+            showCorrection(corrections) {
+                corrections.forEach(({ qubit, type }) => {
+                    const dataQubit = this.objects.get(`data_${qubit}`);
+                    if (!dataQubit) return;
+                    
+                    // Create correction effect
+                    const geometry = new THREE.TorusGeometry(2, 0.3, 16, 32);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: this.colors.correction,
+                        emissive: this.colors.correction,
+                        emissiveIntensity: 0.8,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    const ring = new THREE.Mesh(geometry, material);
+                    ring.position.copy(dataQubit.position);
+                    this.scene.add(ring);
+                    
+                    this.animations.push({
+                        object: ring,
+                        type: 'correction',
+                        startTime: Date.now(),
+                        duration: 1000
+                    });
+                });
+            }
+            
+            createBeam(start, end, color) {
+                const distance = start.distanceTo(end);
+                const geometry = new THREE.CylinderGeometry(0.15, 0.15, distance);
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const beam = new THREE.Mesh(geometry, material);
+                beam.position.lerpVectors(start, end, 0.5);
+                
+                const direction = new THREE.Vector3().subVectors(end, start).normalize();
+                const axis = new THREE.Vector3(0, 1, 0);
+                const angle = Math.acos(axis.dot(direction));
+                const rotationAxis = new THREE.Vector3().crossVectors(axis, direction).normalize();
+                
+                if (rotationAxis.length() > 0) {
+                    beam.setRotationFromAxisAngle(rotationAxis, angle);
+                }
+                
+                return beam;
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                // Update animations
+                const now = Date.now();
+                this.animations = this.animations.filter(anim => {
+                    const progress = (now - anim.startTime) / anim.duration;
+                    
+                    if (progress >= 1) {
+                        this.scene.remove(anim.object);
+                        if (anim.object.geometry) anim.object.geometry.dispose();
+                        if (anim.object.material) anim.object.material.dispose();
+                        return false;
+                    }
+                    
+                    // Update animation based on type
+                    switch (anim.type) {
+                        case 'error':
+                        case 'syndrome':
+                            anim.object.scale.setScalar(1 + progress * 0.5);
+                            anim.object.material.opacity = 0.8 * (1 - progress);
+                            anim.object.rotation.z = progress * Math.PI * 2;
+                            break;
+                            
+                        case 'measurement':
+                            anim.object.material.opacity = 0.8 * (1 - progress);
+                            anim.object.scale.x = anim.object.scale.z = 1 + progress;
+                            break;
+                            
+                        case 'correction':
+                            anim.object.scale.setScalar(1 + progress);
+                            anim.object.material.opacity = 0.8 * (1 - progress);
+                            anim.object.rotation.z = progress * Math.PI * 2;
+                            break;
+                    }
+                    
+                    return true;
+                });
+                
+                // Rotate ancilla qubits
+                this.objects.forEach((obj, key) => {
+                    if (key.startsWith('ancilla_')) {
+                        obj.rotation.y += 0.01;
+                        obj.position.y = 3 + Math.sin(now * 0.001) * 0.2;
+                    }
+                });
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            clearScene() {
+                this.objects.forEach(obj => {
+                    this.scene.remove(obj);
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                });
+                this.objects.clear();
+                
+                // Clear animations
+                this.animations.forEach(anim => {
+                    this.scene.remove(anim.object);
+                    if (anim.object.geometry) anim.object.geometry.dispose();
+                    if (anim.object.material) anim.object.material.dispose();
+                });
+                this.animations = [];
+            }
+            
+            resize() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                const width = rect.width;
+                const height = rect.height;
+                
+                this.camera.aspect = width / height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(width, height);
+            }
+        }
+        
+        // Global variables
+        let quantumSystem;
+        let visualizer;
+        let isSimulating = false;
+        let logFilter = 'all';
+        let performanceData = {
+            errorRates: [],
+            logicalRates: [],
+            cycles: []
+        };
+        
+        // Initialize
+        function init() {
+            const canvas = document.getElementById('main-canvas');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            visualizer = new QuantumVisualizer(canvas);
+            
+            // Create initial quantum system
+            quantumSystem = new AdvancedQuantumSystem('surface', 5);
+            visualizer.createLattice(quantumSystem);
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initialize displays
+            updateAllDisplays();
+            
+            // Start animation
+            visualizer.animate();
+            
+            // Initialize charts
+            initializeCharts();
+            
+            log('Advanced QEC System initialized', 'success');
+        }
+        
+        function setupEventListeners() {
+            // Code selection
+            document.querySelectorAll('.code-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const codeType = e.currentTarget.id.replace('-code', '');
+                    selectCode(codeType);
+                });
+            });
+            
+            // Sliders
+            document.getElementById('distance-slider').addEventListener('input', (e) => {
+                const distance = parseInt(e.target.value);
+                document.getElementById('distance-value').textContent = distance;
+                updateCodeParameters();
+            });
+            
+            document.getElementById('rounds-slider').addEventListener('input', (e) => {
+                document.getElementById('rounds-value').textContent = e.target.value;
+            });
+            
+            document.getElementById('gate-error-slider').addEventListener('input', (e) => {
+                const value = e.target.value / 1000;
+                document.getElementById('gate-error-value').textContent = (value * 100).toFixed(1) + '%';
+                quantumSystem.noiseModel.gateError = value;
+            });
+            
+            document.getElementById('measurement-error-slider').addEventListener('input', (e) => {
+                const value = e.target.value / 1000;
+                document.getElementById('measurement-error-value').textContent = (value * 100).toFixed(1) + '%';
+                quantumSystem.noiseModel.measurementError = value;
+            });
+            
+            document.getElementById('idle-error-slider').addEventListener('input', (e) => {
+                const value = e.target.value / 1000;
+                document.getElementById('idle-error-value').textContent = (value * 100).toFixed(2) + '%';
+                quantumSystem.noiseModel.idleError = value;
+            });
+            
+            document.getElementById('correlated-slider').addEventListener('input', (e) => {
+                const value = e.target.value / 100;
+                document.getElementById('correlated-value').textContent = (value * 100).toFixed(0) + '%';
+                quantumSystem.noiseModel.correlatedErrorRate = value;
+            });
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                visualizer.resize();
+            });
+        }
+        
+        // Control functions
+        function selectCode(codeType) {
+            // Update UI
+            document.querySelectorAll('.code-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.getElementById(`${codeType}-code`).classList.add('selected');
+            
+            // Create new quantum system
+            const distance = parseInt(document.getElementById('distance-slider').value);
+            quantumSystem = new AdvancedQuantumSystem(codeType, distance);
+            
+            // Update visualization
+            visualizer.createLattice(quantumSystem);
+            
+            // Update displays
+            updateAllDisplays();
+            
+            log(`Switched to ${codeType} code`, 'info');
+        }
+        
+        function selectDecoder(decoderType) {
+            // Update UI
+            document.querySelectorAll('.decoder-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.getElementById(`${decoderType}-decoder`).classList.add('active');
+            
+            // Update system
+            quantumSystem.decoderType = decoderType;
+            
+            log(`Decoder switched to ${decoderType.toUpperCase()}`, 'info');
+        }
+        
+        function updateCodeParameters() {
+            const distance = parseInt(document.getElementById('distance-slider').value);
+            quantumSystem.distance = distance;
+            quantumSystem.setupCode();
+            
+            visualizer.createLattice(quantumSystem);
+            updateAllDisplays();
+        }
+        
+        // Error injection
+        function injectError(type) {
+            quantumSystem.injectError(type);
+            visualizer.updateQubitStates(quantumSystem.errors);
+            updateMetrics();
+        }
+        
+        function injectCorrelatedError(type = 'XX') {
+            const errorType = type[0];
+            quantumSystem.injectError(errorType, null, true);
+            visualizer.updateQubitStates(quantumSystem.errors);
+            updateMetrics();
+        }
+        
+        function injectMeasurementError() {
+            log('Measurement error will be applied in next round', 'warning');
+            quantumSystem.noiseModel.measurementError += 0.1;
+            setTimeout(() => {
+                quantumSystem.noiseModel.measurementError -= 0.1;
+            }, 1000);
+        }
+        
+        function injectLogicalError() {
+            // Inject errors that form a logical operator
+            const logicalQubits = quantumSystem.logicalX;
+            logicalQubits.forEach(q => {
+                quantumSystem.injectError('X', q);
+            });
+            visualizer.updateQubitStates(quantumSystem.errors);
+            updateMetrics();
+        }
+        
+        function injectRandomErrors() {
+            const numErrors = Math.floor(Math.random() * 3) + 1;
+            const errorTypes = ['X', 'Y', 'Z'];
+            
+            for (let i = 0; i < numErrors; i++) {
+                const type = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+                const useCorrelated = Math.random() < quantumSystem.noiseModel.correlatedErrorRate;
+                quantumSystem.injectError(type, null, useCorrelated);
+            }
+            
+            visualizer.updateQubitStates(quantumSystem.errors);
+            updateMetrics();
+        }
+        
+        // Simulation control
+        async function runSingleCycle() {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            document.getElementById('single-cycle-btn').disabled = true;
+            
+            const rounds = parseInt(document.getElementById('rounds-slider').value);
+            
+            // Run QEC cycle with visualization
+            for (let r = 0; r < rounds; r++) {
+                // Measure stabilizers
+                const syndrome = quantumSystem.measureStabilizers(r);
+                
+                // Visualize measurements
+                if (quantumSystem.codeType === 'surface') {
+                    quantumSystem.xStabilizers.forEach((stab, idx) => {
+                        visualizer.showMeasurement(`X${idx}`, stab, 'X');
+                    });
+                    quantumSystem.zStabilizers.forEach((stab, idx) => {
+                        visualizer.showMeasurement(`Z${idx}`, stab, 'Z');
+                    });
+                }
+                
+                // Show syndrome
+                visualizer.showSyndrome(syndrome);
+                updateSyndromeDisplay(syndrome);
+                
+                await sleep(1000);
+            }
+            
+            // Decode and correct
+            const corrections = quantumSystem.decode(quantumSystem.syndromeHistory);
+            if (corrections && corrections.length > 0) {
+                quantumSystem.applyCorrections(corrections);
+                visualizer.showCorrection(corrections);
+                visualizer.updateQubitStates(quantumSystem.errors);
+            }
+            
+            // Check logical error
+            quantumSystem.checkLogicalError();
+            
+            // Update displays
+            updateMetrics();
+            updatePerformanceChart();
+            
+            isSimulating = false;
+            document.getElementById('single-cycle-btn').disabled = false;
+        }
+        
+        async function runContinuous() {
+            if (isSimulating) {
+                pauseSimulation();
+                return;
+            }
+            
+            isSimulating = true;
+            document.getElementById('continuous-btn').textContent = '⏸ Pause';
+            
+            while (isSimulating) {
+                await runSingleCycle();
+                
+                // Apply random errors
+                if (Math.random() < 0.3) {
+                    injectRandomErrors();
+                }
+                
+                await sleep(500);
+            }
+        }
+        
+        function pauseSimulation() {
+            isSimulating = false;
+            document.getElementById('continuous-btn').textContent = '🔄 Continuous Mode';
+            document.getElementById('single-cycle-btn').disabled = false;
+        }
+        
+        async function startBenchmark() {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            document.getElementById('benchmark-btn').disabled = true;
+            
+            log('Starting benchmark...', 'info');
+            
+            // Reset performance data
+            performanceData = {
+                errorRates: [],
+                logicalRates: [],
+                cycles: []
+            };
+            
+            // Test different error rates
+            const errorRates = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05];
+            const cyclesPerRate = 100;
+            
+            for (const errorRate of errorRates) {
+                // Set error rate
+                quantumSystem.noiseModel.gateError = errorRate;
+                quantumSystem.noiseModel.measurementError = errorRate * 2;
+                quantumSystem.noiseModel.idleError = errorRate * 0.5;
+                
+                // Reset system
+                quantumSystem.errors.clear();
+                quantumSystem.logicalErrors = 0;
+                quantumSystem.totalCycles = 0;
+                
+                // Run cycles
+                for (let i = 0; i < cyclesPerRate; i++) {
+                    const result = quantumSystem.runQECRound(3);
+                    
+                    if (i % 10 === 0) {
+                        updateMetrics();
+                        await sleep(10);
+                    }
+                }
+                
+                // Record results
+                performanceData.errorRates.push(errorRate);
+                performanceData.logicalRates.push(quantumSystem.getLogicalErrorRate());
+                performanceData.cycles.push(quantumSystem.totalCycles);
+                
+                log(`Tested error rate ${(errorRate * 100).toFixed(1)}%: Logical rate ${quantumSystem.getLogicalErrorRate().toFixed(4)}`, 'info');
+            }
+            
+            // Update chart
+            updateThresholdChart();
+            
+            isSimulating = false;
+            document.getElementById('benchmark-btn').disabled = false;
+            
+            log('Benchmark complete!', 'success');
+        }
+        
+        function resetSystem() {
+            pauseSimulation();
+            
+            // Reset quantum system
+            quantumSystem.errors.clear();
+            quantumSystem.syndromeHistory = [];
+            quantumSystem.measurementErrors.clear();
+            quantumSystem.logicalErrors = 0;
+            quantumSystem.totalCycles = 0;
+            quantumSystem.successfulCorrections = 0;
+            
+            // Reset visuals
+            visualizer.updateQubitStates(quantumSystem.errors);
+            
+            // Reset displays
+            updateAllDisplays();
+            
+            // Clear log
+            document.getElementById('system-log').innerHTML = '';
+            
+            log('System reset', 'success');
+        }
+        
+        // Display updates
+        function updateAllDisplays() {
+            updateMetrics();
+            updateSyndromeDisplay({ x: [], z: [] });
+            updateCircuitDepth();
+        }
+        
+        function updateMetrics() {
+            const metrics = quantumSystem.getMetrics();
+            
+            document.getElementById('logical-rate').textContent = metrics.logicalErrorRate.toFixed(4);
+            document.getElementById('physical-qubits').textContent = metrics.physicalQubits;
+            document.getElementById('qec-cycles').textContent = metrics.totalCycles;
+            document.getElementById('success-rate').textContent = metrics.successRate + '%';
+        }
+        
+        function updateSyndromeDisplay(syndrome) {
+            const display = document.getElementById('syndrome-display');
+            display.innerHTML = '';
+            
+            // Create syndrome matrix display
+            const maxLength = Math.max(
+                syndrome.x ? syndrome.x.length : 0,
+                syndrome.z ? syndrome.z.length : 0
+            );
+            
+            for (let i = 0; i < Math.ceil(Math.sqrt(maxLength)); i++) {
+                const row = document.createElement('div');
+                row.className = 'syndrome-row';
+                
+                for (let j = 0; j < Math.ceil(Math.sqrt(maxLength)); j++) {
+                    const idx = i * Math.ceil(Math.sqrt(maxLength)) + j;
+                    
+                    // X syndrome
+                    if (syndrome.x && idx < syndrome.x.length) {
+                        const cell = document.createElement('div');
+                        cell.className = 'syndrome-cell' + (syndrome.x[idx] === 1 ? ' active' : '');
+                        cell.textContent = syndrome.x[idx];
+                        cell.style.borderColor = '#e94560';
+                        row.appendChild(cell);
+                    }
+                    
+                    // Spacer
+                    const spacer = document.createElement('div');
+                    spacer.style.width = '10px';
+                    row.appendChild(spacer);
+                    
+                    // Z syndrome
+                    if (syndrome.z && idx < syndrome.z.length) {
+                        const cell = document.createElement('div');
+                        cell.className = 'syndrome-cell' + (syndrome.z[idx] === 1 ? ' active' : '');
+                        cell.textContent = syndrome.z[idx];
+                        cell.style.borderColor = '#9b59b6';
+                        row.appendChild(cell);
+                    }
+                }
+                
+                display.appendChild(row);
+            }
+        }
+        
+        function updateCircuitDepth() {
+            // Circuit depth is proportional to code distance
+            const distance = quantumSystem.distance;
+            const czDepth = 4 * distance;
+            const czzDepth = 2 * distance;
+            
+            // Update display
+            document.querySelector('.cz-fill').style.width = '100%';
+            document.querySelector('.czz-fill').style.width = `${(czzDepth / czDepth) * 100}%`;
+        }
+        
+        // Charts
+        let errorChart, performanceChart;
+        
+        function initializeCharts() {
+            // Error rate chart
+            const errorCanvas = document.getElementById('error-chart');
+            const errorCtx = errorCanvas.getContext('2d');
+            errorCanvas.width = 226;
+            errorCanvas.height = 130;
+            
+            // Performance chart
+            const perfCanvas = document.getElementById('performance-chart');
+            const perfCtx = perfCanvas.getContext('2d');
+            perfCanvas.width = perfCanvas.offsetWidth;
+            perfCanvas.height = 180;
+        }
+        
+        function updatePerformanceChart() {
+            const canvas = document.getElementById('error-chart');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(25, canvas.height - 25);
+            ctx.lineTo(canvas.width - 10, canvas.height - 25);
+            ctx.moveTo(25, canvas.height - 25);
+            ctx.lineTo(25, 10);
+            ctx.stroke();
+            
+            // Draw data if available
+            if (performanceData.cycles.length > 0) {
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                const xScale = (canvas.width - 35) / performanceData.cycles.length;
+                const yScale = (canvas.height - 35) / Math.max(...performanceData.logicalRates);
+                
+                performanceData.logicalRates.forEach((rate, i) => {
+                    const x = 25 + i * xScale;
+                    const y = canvas.height - 25 - rate * yScale;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#888';
+            ctx.font = '10px Arial';
+            ctx.fillText('Cycles', canvas.width / 2, canvas.height - 5);
+            ctx.save();
+            ctx.translate(8, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Logical Error Rate', 0, 0);
+            ctx.restore();
+        }
+        
+        function updateThresholdChart() {
+            const canvas = document.getElementById('performance-chart');
+            const ctx = canvas.getContext('2d');
+            
+            // Update canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 180;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(35, canvas.height - 25);
+            ctx.lineTo(canvas.width - 15, canvas.height - 25);
+            ctx.moveTo(35, canvas.height - 25);
+            ctx.lineTo(35, 15);
+            ctx.stroke();
+            
+            if (performanceData.errorRates.length === 0) return;
+            
+            // Plot data
+            const xScale = (canvas.width - 50) / Math.log10(performanceData.errorRates[performanceData.errorRates.length - 1] / performanceData.errorRates[0]);
+            const yScale = (canvas.height - 40) / Math.log10(Math.max(...performanceData.logicalRates) / Math.min(...performanceData.logicalRates.filter(r => r > 0)));
+            
+            // CZZ line
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            performanceData.errorRates.forEach((rate, i) => {
+                if (performanceData.logicalRates[i] > 0) {
+                    const x = 35 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
+                    const y = canvas.height - 25 - Math.log10(performanceData.logicalRates[i] / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+            });
+            
+            ctx.stroke();
+            
+            // CZ line (simulated as 38% worse)
+            ctx.strokeStyle = '#ff6666';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            performanceData.errorRates.forEach((rate, i) => {
+                if (performanceData.logicalRates[i] > 0) {
+                    const x = 35 + Math.log10(rate / performanceData.errorRates[0]) * xScale;
+                    const y = canvas.height - 25 - Math.log10(performanceData.logicalRates[i] * 1.38 / Math.min(...performanceData.logicalRates.filter(r => r > 0))) * yScale;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#888';
+            ctx.font = '11px Arial';
+            ctx.fillText('Physical Error Rate', canvas.width / 2 - 40, canvas.height - 5);
+            
+            ctx.save();
+            ctx.translate(12, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Logical Error Rate', 0, 0);
+            ctx.restore();
+            
+            // Legend
+            ctx.fillStyle = '#00ff88';
+            ctx.fillRect(canvas.width - 80, 25, 15, 3);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px Arial';
+            ctx.fillText('CZZ Gates', canvas.width - 60, 29);
+            
+            ctx.fillStyle = '#ff6666';
+            ctx.fillRect(canvas.width - 80, 38, 15, 3);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('CZ Gates', canvas.width - 60, 42);
+            
+            // Threshold lines
+            const czzThreshold = 0.0105;
+            const czThreshold = 0.0076;
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const xThresholdCZZ = 35 + Math.log10(czzThreshold / performanceData.errorRates[0]) * xScale;
+            ctx.moveTo(xThresholdCZZ, 15);
+            ctx.lineTo(xThresholdCZZ, canvas.height - 25);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#ff6666';
+            ctx.beginPath();
+            const xThresholdCZ = 35 + Math.log10(czThreshold / performanceData.errorRates[0]) * xScale;
+            ctx.moveTo(xThresholdCZ, 15);
+            ctx.lineTo(xThresholdCZ, canvas.height - 25);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+        }
+        
+        // Logging
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('system-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            // Apply filter
+            if (logFilter !== 'all') {
+                if (type === 'error' && logFilter !== 'errors') return;
+                if (type === 'success' && logFilter !== 'corrections') return;
+                if (type === 'info' && logFilter !== 'measurements') return;
+            }
+            
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Limit log entries
+            while (logContainer.children.length > 200) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+        
+        function showLog(filter) {
+            logFilter = filter;
+            
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Re-filter existing logs
+            const entries = document.querySelectorAll('.log-entry');
+            entries.forEach(entry => {
+                if (filter === 'all') {
+                    entry.style.display = 'block';
+                } else {
+                    const shouldShow = 
+                        (filter === 'errors' && entry.classList.contains('log-error')) ||
+                        (filter === 'corrections' && entry.classList.contains('log-success')) ||
+                        (filter === 'measurements' && entry.classList.contains('log-info'));
+                    entry.style.display = shouldShow ? 'block' : 'none';
+                }
+            });
+        }
+        
+        // Utility
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Start the application
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
