@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surface Codes with Three-Qubit Gates</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        
+        #container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        #header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(30, 30, 60, 0.8);
+            border-bottom: 2px solid #4a90e2;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #4a90e2, #e94560);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #a0a0a0;
+            margin-top: 10px;
+        }
+        
+        #main-content {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        #controls {
+            width: 350px;
+            background: rgba(40, 40, 80, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        #visualization {
+            flex: 1;
+            position: relative;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 600px;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(50, 50, 100, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(100, 100, 200, 0.3);
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #4a90e2;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        #info-panel {
+            background: rgba(30, 30, 60, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .highlight {
+            color: #e94560;
+            font-weight: bold;
+        }
+        
+        .slider-container {
+            margin: 15px 0;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(100, 100, 200, 0.3);
+            outline: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4a90e2;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(74, 144, 226, 0.5);
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(60, 60, 120, 0.2);
+            border-radius: 5px;
+        }
+        
+        .metric-label {
+            color: #a0a0a0;
+        }
+        
+        .metric-value {
+            color: #4a90e2;
+            font-weight: bold;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+        
+        #legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(30, 30, 60, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Fault-Tolerant Surface Codes with Three-Qubit Gates</h1>
+            <div class="subtitle">Interactive Visualization of Quantum Error Correction</div>
+        </div>
+        
+        <div id="main-content">
+            <div id="controls">
+                <div class="section">
+                    <h3>🎯 Concept Navigator</h3>
+                    <div class="button-group">
+                        <button onclick="showIntro()">Introduction</button>
+                        <button onclick="showSurfaceCode()">Surface Codes</button>
+                        <button onclick="showStabilizers()">Stabilizers</button>
+                        <button onclick="showGates()">Gate Comparison</button>
+                        <button onclick="showFaultTolerance()">Fault Tolerance</button>
+                        <button onclick="showResults()">Results</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>⚙️ Visualization Controls</h3>
+                    <div class="slider-container">
+                        <label>Code Distance: <span id="distance-value">3</span></label>
+                        <input type="range" id="distance-slider" min="3" max="7" value="3" step="2">
+                    </div>
+                    <div class="slider-container">
+                        <label>Animation Speed</label>
+                        <input type="range" id="speed-slider" min="0.1" max="3" value="1" step="0.1">
+                    </div>
+                    <div class="button-group">
+                        <button onclick="toggleRotation()">Toggle Rotation</button>
+                        <button onclick="resetView()">Reset View</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>📊 Performance Metrics</h3>
+                    <div class="metric">
+                        <span class="metric-label">Code Type:</span>
+                        <span class="metric-value" id="code-type">Unrotated</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Gate Type:</span>
+                        <span class="metric-value" id="gate-type">CZZ (3-qubit)</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Threshold Improvement:</span>
+                        <span class="metric-value" id="threshold">+38%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Fault Locations:</span>
+                        <span class="metric-value" id="fault-locations">Reduced</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="visualization">
+                <div id="canvas-container">
+                    <div id="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4a90e2;"></div>
+                            <span>Data Qubits</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e94560;"></div>
+                            <span>Ancilla Qubits</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #50c878;"></div>
+                            <span>Stabilizers</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffd700;"></div>
+                            <span>Active Gates</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="info-panel">
+                    <h3 id="info-title">Welcome to Surface Code Visualization</h3>
+                    <p id="info-content">
+                        This interactive tool helps you understand the groundbreaking research on using 
+                        <span class="highlight">three-qubit gates</span> for quantum error correction. 
+                        Contrary to conventional wisdom, these gates can be fault-tolerant in unrotated 
+                        surface codes, leading to significant performance improvements.
+                    </p>
+                    <p id="info-extra">
+                        Click the buttons above to explore different concepts, or interact with the 3D 
+                        visualization directly using your mouse.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Global variables
+        let scene, camera, renderer;
+        let surfaceCode;
+        let animationSpeed = 1;
+        let isRotating = true;
+        let currentMode = 'intro';
+        let codeDistance = 3;
+        
+        // Initialize Three.js
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x141428);
+            scene.fog = new THREE.Fog(0x141428, 50, 200);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.set(30, 30, 30);
+            camera.lookAt(0, 0, 0);
+            
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404060, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(20, 40, 20);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 100;
+            directionalLight.shadow.camera.left = -30;
+            directionalLight.shadow.camera.right = 30;
+            directionalLight.shadow.camera.top = 30;
+            directionalLight.shadow.camera.bottom = -30;
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x4a90e2, 0.5, 50);
+            pointLight.position.set(-20, 20, -20);
+            scene.add(pointLight);
+            
+            // Mouse controls
+            setupMouseControls();
+            
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('distance-slider').addEventListener('input', onDistanceChange);
+            document.getElementById('speed-slider').addEventListener('input', onSpeedChange);
+            
+            // Start with introduction
+            showIntro();
+            
+            // Start animation
+            animate();
+        }
+        
+        function setupMouseControls() {
+            const container = document.getElementById('canvas-container');
+            let mouseX = 0, mouseY = 0;
+            let targetX = 0, targetY = 0;
+            
+            container.addEventListener('mousemove', (event) => {
+                const rect = container.getBoundingClientRect();
+                mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            });
+            
+            function updateCamera() {
+                if (!isRotating) return;
+                
+                targetX += (mouseX - targetX) * 0.05;
+                targetY += (mouseY - targetY) * 0.05;
+                
+                const radius = 40;
+                const baseAngle = Date.now() * 0.0005 * animationSpeed;
+                
+                camera.position.x = radius * Math.cos(baseAngle + targetX);
+                camera.position.z = radius * Math.sin(baseAngle + targetX);
+                camera.position.y = 30 + targetY * 10;
+                
+                camera.lookAt(0, 0, 0);
+                
+                requestAnimationFrame(updateCamera);
+            }
+            
+            updateCamera();
+        }
+        
+        // Surface Code Class
+        class SurfaceCode {
+            constructor(distance, type = 'unrotated') {
+                this.distance = distance;
+                this.type = type;
+                this.group = new THREE.Group();
+                this.qubits = [];
+                this.stabilizers = [];
+                this.connections = [];
+                this.animationTime = 0;
+                
+                this.createLattice();
+            }
+            
+            createLattice() {
+                const spacing = 4;
+                const offset = (this.distance - 1) * spacing / 2;
+                
+                // Create data qubits
+                for (let i = 0; i < this.distance; i++) {
+                    for (let j = 0; j < this.distance; j++) {
+                        if (this.type === 'rotated' && (i + j) % 2 === 1) continue;
+                        
+                        const geometry = new THREE.SphereGeometry(0.8, 32, 32);
+                        const material = new THREE.MeshPhongMaterial({
+                            color: 0x4a90e2,
+                            emissive: 0x4a90e2,
+                            emissiveIntensity: 0.2
+                        });
+                        const qubit = new THREE.Mesh(geometry, material);
+                        
+                        qubit.position.set(
+                            i * spacing - offset,
+                            0,
+                            j * spacing - offset
+                        );
+                        
+                        qubit.castShadow = true;
+                        qubit.receiveShadow = true;
+                        
+                        this.qubits.push(qubit);
+                        this.group.add(qubit);
+                    }
+                }
+                
+                // Create ancilla qubits for stabilizers
+                if (this.type === 'unrotated') {
+                    this.createUnrotatedStabilizers(spacing, offset);
+                } else {
+                    this.createRotatedStabilizers(spacing, offset);
+                }
+                
+                // Add grid
+                this.createGrid(spacing, offset);
+            }
+            
+            createUnrotatedStabilizers(spacing, offset) {
+                // Z-stabilizers (plaquettes)
+                for (let i = 0; i < this.distance - 1; i++) {
+                    for (let j = 0; j < this.distance - 1; j++) {
+                        const geometry = new THREE.OctahedronGeometry(0.6);
+                        const material = new THREE.MeshPhongMaterial({
+                            color: 0xe94560,
+                            emissive: 0xe94560,
+                            emissiveIntensity: 0.3
+                        });
+                        const ancilla = new THREE.Mesh(geometry, material);
+                        
+                        ancilla.position.set(
+                            i * spacing + spacing/2 - offset,
+                            2,
+                            j * spacing + spacing/2 - offset
+                        );
+                        
+                        ancilla.userData = {
+                            type: 'Z',
+                            connectedQubits: [
+                                [i, j], [i+1, j], [i, j+1], [i+1, j+1]
+                            ]
+                        };
+                        
+                        this.stabilizers.push(ancilla);
+                        this.group.add(ancilla);
+                    }
+                }
+            }
+            
+            createRotatedStabilizers(spacing, offset) {
+                // Implementation for rotated surface codes
+                // Similar structure but different connectivity
+            }
+            
+            createGrid(spacing, offset) {
+                const gridSize = this.distance * spacing;
+                const divisions = this.distance;
+                
+                const gridHelper = new THREE.GridHelper(gridSize, divisions, 0x404080, 0x303050);
+                gridHelper.position.y = -0.5;
+                this.group.add(gridHelper);
+            }
+            
+            showStabilizerMeasurement(stabilizerIndex, gateType = 'CZZ') {
+                if (stabilizerIndex >= this.stabilizers.length) return;
+                
+                const stabilizer = this.stabilizers[stabilizerIndex];
+                const connectedQubits = stabilizer.userData.connectedQubits;
+                
+                // Clear previous connections
+                this.clearConnections();
+                
+                // Highlight stabilizer
+                stabilizer.material.emissive = new THREE.Color(0xffd700);
+                stabilizer.material.emissiveIntensity = 0.8;
+                
+                if (gateType === 'CZZ') {
+                    // Three-qubit gate visualization
+                    this.showThreeQubitGate(stabilizer, connectedQubits);
+                } else {
+                    // Two-qubit gate visualization
+                    this.showTwoQubitGates(stabilizer, connectedQubits);
+                }
+            }
+            
+            showThreeQubitGate(ancilla, qubits) {
+                // Create connections for three-qubit gate
+                const geometry = new THREE.CylinderGeometry(0.15, 0.15, 1);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0xffd700,
+                    emissive: 0xffd700,
+                    emissiveIntensity: 0.5,
+                    opacity: 0.8,
+                    transparent: true
+                });
+                
+                // Connect to diagonal qubits (for fault tolerance in unrotated codes)
+                const diagonalIndices = [0, 3]; // NW and SE corners
+                
+                diagonalIndices.forEach(idx => {
+                    const [i, j] = qubits[idx];
+                    const qubitIndex = i * this.distance + j;
+                    if (qubitIndex < this.qubits.length) {
+                        const targetQubit = this.qubits[qubitIndex];
+                        
+                        const connection = new THREE.Mesh(geometry, material);
+                        const distance = ancilla.position.distanceTo(targetQubit.position);
+                        connection.scale.y = distance;
+                        
+                        const midpoint = new THREE.Vector3()
+                            .addVectors(ancilla.position, targetQubit.position)
+                            .multiplyScalar(0.5);
+                        connection.position.copy(midpoint);
+                        
+                        connection.lookAt(targetQubit.position);
+                        connection.rotateX(Math.PI / 2);
+                        
+                        this.connections.push(connection);
+                        this.group.add(connection);
+                        
+                        // Highlight connected qubit
+                        targetQubit.material.emissive = new THREE.Color(0x50c878);
+                        targetQubit.material.emissiveIntensity = 0.5;
+                    }
+                });
+            }
+            
+            showTwoQubitGates(ancilla, qubits) {
+                // Sequential two-qubit gates
+                const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0xffd700,
+                    emissive: 0xffd700,
+                    emissiveIntensity: 0.3,
+                    opacity: 0.6,
+                    transparent: true
+                });
+                
+                qubits.forEach(([i, j], idx) => {
+                    const qubitIndex = i * this.distance + j;
+                    if (qubitIndex < this.qubits.length) {
+                        setTimeout(() => {
+                            const targetQubit = this.qubits[qubitIndex];
+                            
+                            const connection = new THREE.Mesh(geometry, material);
+                            const distance = ancilla.position.distanceTo(targetQubit.position);
+                            connection.scale.y = distance;
+                            
+                            const midpoint = new THREE.Vector3()
+                                .addVectors(ancilla.position, targetQubit.position)
+                                .multiplyScalar(0.5);
+                            connection.position.copy(midpoint);
+                            
+                            connection.lookAt(targetQubit.position);
+                            connection.rotateX(Math.PI / 2);
+                            
+                            this.connections.push(connection);
+                            this.group.add(connection);
+                            
+                            // Highlight connected qubit
+                            targetQubit.material.emissive = new THREE.Color(0x50c878);
+                            targetQubit.material.emissiveIntensity = 0.3;
+                        }, idx * 200 / animationSpeed);
+                    }
+                });
+            }
+            
+            clearConnections() {
+                this.connections.forEach(conn => {
+                    this.group.remove(conn);
+                });
+                this.connections = [];
+                
+                // Reset qubit colors
+                this.qubits.forEach(qubit => {
+                    qubit.material.emissive = new THREE.Color(0x4a90e2);
+                    qubit.material.emissiveIntensity = 0.2;
+                });
+                
+                // Reset stabilizer colors
+                this.stabilizers.forEach(stab => {
+                    stab.material.emissive = new THREE.Color(0xe94560);
+                    stab.material.emissiveIntensity = 0.3;
+                });
+            }
+            
+            update(deltaTime) {
+                this.animationTime += deltaTime;
+                
+                // Animate qubits
+                this.qubits.forEach((qubit, idx) => {
+                    qubit.position.y = Math.sin(this.animationTime * 2 + idx * 0.2) * 0.2;
+                });
+                
+                // Animate stabilizers
+                this.stabilizers.forEach((stab, idx) => {
+                    stab.rotation.y += deltaTime * 0.5;
+                    stab.position.y = 2 + Math.sin(this.animationTime * 3 + idx * 0.3) * 0.3;
+                });
+                
+                // Animate connections
+                this.connections.forEach(conn => {
+                    conn.material.opacity = 0.6 + Math.sin(this.animationTime * 4) * 0.2;
+                });
+            }
+        }
+        
+        // Navigation functions
+        function showIntro() {
+            currentMode = 'intro';
+            clearScene();
+            
+            // Create simple surface code
+            surfaceCode = new SurfaceCode(3, 'unrotated');
+            scene.add(surfaceCode.group);
+            
+            updateInfo(
+                "Introduction to Fault-Tolerant Three-Qubit Gates",
+                "This research challenges the conventional wisdom that only single- and two-qubit gates can be used for fault-tolerant quantum error correction. The key discovery is that <span class='highlight'>three-qubit CZZ gates</span> can maintain fault tolerance in unrotated surface codes.",
+                "Key benefits: • Fewer fault locations • Higher error thresholds (+38%) • Lower logical error rates • Reduced circuit depth"
+            );
+        }
+        
+        function showSurfaceCode() {
+            currentMode = 'surface_code';
+            clearScene();
+            
+            // Show both types side by side
+            const unrotated = new SurfaceCode(codeDistance, 'unrotated');
+            unrotated.group.position.x = -15;
+            scene.add(unrotated.group);
+            
+            const rotated = new SurfaceCode(codeDistance, 'rotated');
+            rotated.group.position.x = 15;
+            scene.add(rotated.group);
+            
+            updateInfo(
+                "Surface Codes: Rotated vs Unrotated",
+                "Surface codes are leading candidates for quantum error correction. The <span class='highlight'>unrotated surface code</span> (left) uses more physical qubits but allows fault-tolerant three-qubit gates. The <span class='highlight'>rotated surface code</span> (right) is more qubit-efficient but breaks fault tolerance with three-qubit gates.",
+                "Blue spheres represent data qubits storing quantum information. Red octahedra are ancilla qubits used for error detection."
+            );
+        }
+        
+        function showStabilizers() {
+            currentMode = 'stabilizers';
+            clearScene();
+            
+            surfaceCode = new SurfaceCode(codeDistance, 'unrotated');
+            scene.add(surfaceCode.group);
+            
+            // Animate through stabilizer measurements
+            let stabIndex = 0;
+            const cycleStabilizers = () => {
+                if (currentMode === 'stabilizers') {
+                    surfaceCode.showStabilizerMeasurement(stabIndex % surfaceCode.stabilizers.length, 'CZZ');
+                    stabIndex++;
+                    setTimeout(cycleStabilizers, 2000 / animationSpeed);
+                }
+            };
+            cycleStabilizers();
+            
+            updateInfo(
+                "Stabilizer Measurements",
+                "Stabilizers detect errors without disturbing the encoded quantum information. Each <span class='highlight'>ancilla qubit</span> (red) measures the parity of surrounding data qubits. With three-qubit gates, we can measure multiple qubits simultaneously.",
+                "The golden connections show active gate operations. Notice how CZZ gates connect to diagonal qubits for fault tolerance."
+            );
+        }
+        
+        function showGates() {
+            currentMode = 'gates';
+            clearScene();
+            
+            // Show gate comparison
+            const czCode = new SurfaceCode(3, 'unrotated');
+            czCode.group.position.x = -15;
+            scene.add(czCode.group);
+            
+            const czzCode = new SurfaceCode(3, 'unrotated');
+            czzCode.group.position.x = 15;
+            scene.add(czzCode.group);
+            
+            // Animate both
+            czCode.showStabilizerMeasurement(0, 'CZ');
+            czzCode.showStabilizerMeasurement(0, 'CZZ');
+            
+            updateInfo(
+                "Gate Comparison: CZ vs CZZ",
+                "Traditional <span class='highlight'>CZ gates</span> (left) require 4 sequential operations to measure a stabilizer. The innovative <span class='highlight'>CZZ gates</span> (right) accomplish the same measurement in just 2 parallel operations.",
+                "This reduction in circuit depth means: • Fewer opportunities for errors • Shorter operation time • Better coherence preservation"
+            );
+            
+            document.getElementById('gate-type').textContent = 'Comparing Both';
+        }
+        
+        function showFaultTolerance() {
+            currentMode = 'fault_tolerance';
+            clearScene();
+            
+            surfaceCode = new SurfaceCode(5, 'unrotated');
+            scene.add(surfaceCode.group);
+            
+            // Highlight fault-tolerant properties
+            surfaceCode.showStabilizerMeasurement(4, 'CZZ');
+            
+            updateInfo(
+                "Fault Tolerance Mechanism",
+                "The key to fault tolerance is the <span class='highlight'>diagonal ordering</span> of connections in unrotated surface codes. When CZZ gates connect to North-West and South-East qubits, errors cannot propagate in ways that create undetectable logical errors.",
+                "Mathematical proof: Each stabilizer overlaps with minimum-weight logical operators on at most one qubit, preserving the code distance d = " + codeDistance
+            );
+        }
+        
+        function showResults() {
+            currentMode = 'results';
+            clearScene();
+            
+            // Create performance visualization
+            createPerformanceChart();
+            
+            updateInfo(
+                "Experimental Results",
+                "The research demonstrates remarkable improvements: <span class='highlight'>38% higher threshold</span> (from 0.76% to 1.05%), up to <span class='highlight'>50% lower logical error rates</span>, and maintained fault tolerance with full code distance.",
+                "These improvements translate to: • Fewer physical qubits needed for useful computation • Faster quantum algorithms • More practical near-term quantum computers"
+            );
+            
+            document.getElementById('threshold').textContent = '+38% (1.05%)';
+            document.getElementById('fault-locations').textContent = '20% fewer';
+        }
+        
+        function createPerformanceChart() {
+            // Create 3D bar chart showing performance comparison
+            const data = [
+                { label: 'CZ Threshold', value: 0.76, color: 0x4a90e2 },
+                { label: 'CZZ Threshold', value: 1.05, color: 0xe94560 },
+                { label: 'CZ Error (d=5)', value: 0.1, color: 0x4a90e2 },
+                { label: 'CZZ Error (d=5)', value: 0.05, color: 0xe94560 }
+            ];
+            
+            const barWidth = 3;
+            const barSpacing = 5;
+            const scaleFactor = 20;
+            
+            data.forEach((item, index) => {
+                const geometry = new THREE.BoxGeometry(barWidth, item.value * scaleFactor, barWidth);
+                const material = new THREE.MeshPhongMaterial({
+                    color: item.color,
+                    emissive: item.color,
+                    emissiveIntensity: 0.3
+                });
+                
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(
+                    (index - 1.5) * barSpacing,
+                    item.value * scaleFactor / 2,
+                    0
+                );
+                
+                bar.castShadow = true;
+                bar.receiveShadow = true;
+                
+                scene.add(bar);
+                
+                // Add label
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 64;
+                const context = canvas.getContext('2d');
+                context.fillStyle = 'white';
+                context.font = '24px Arial';
+                context.textAlign = 'center';
+                context.fillText(item.label, 128, 40);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const labelMaterial = new THREE.SpriteMaterial({ map: texture });
+                const label = new THREE.Sprite(labelMaterial);
+                label.position.set(bar.position.x, -2, bar.position.z);
+                label.scale.set(4, 1, 1);
+                
+                scene.add(label);
+            });
+        }
+        
+        // Utility functions
+        function clearScene() {
+            while(scene.children.length > 0) { 
+                const child = scene.children[0];
+                if (child.type === 'Group') {
+                    scene.remove(child);
+                } else if (child.type === 'Mesh' || child.type === 'Sprite') {
+                    scene.remove(child);
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        function updateInfo(title, content, extra) {
+            document.getElementById('info-title').innerHTML = title;
+            document.getElementById('info-content').innerHTML = content;
+            document.getElementById('info-extra').innerHTML = extra || '';
+        }
+        
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+        
+        function resetView() {
+            camera.position.set(30, 30, 30);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        function onDistanceChange(event) {
+            codeDistance = parseInt(event.target.value);
+            document.getElementById('distance-value').textContent = codeDistance;
+            
+            // Refresh current view with new distance
+            const currentFunction = {
+                'intro': showIntro,
+                'surface_code': showSurfaceCode,
+                'stabilizers': showStabilizers,
+                'gates': showGates,
+                'fault_tolerance': showFaultTolerance,
+                'results': showResults
+            }[currentMode];
+            
+            if (currentFunction) currentFunction();
+        }
+        
+        function onSpeedChange(event) {
+            animationSpeed = parseFloat(event.target.value);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (surfaceCode) {
+                surfaceCode.update(0.016 * animationSpeed);
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Communication Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        #container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+        
+        #control-panel {
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            padding: 25px;
+            overflow-y: auto;
+            border-right: 1px solid #2a2a4e;
+        }
+        
+        #visualization {
+            position: relative;
+            background: radial-gradient(ellipse at center, #0f0f1e 0%, #000000 100%);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #0099ff, #0066cc);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 153, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #0099ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 3px;
+        }
+        
+        .status-label {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .status-value {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        #canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0099ff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .info-overlay h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .info-overlay p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0099ff;
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .slider-container {
+            margin: 15px 0;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00d4ff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        #message-log {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #0099ff;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 200px;
+            width: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .message {
+            margin: 3px 0;
+            padding: 3px 5px;
+            border-radius: 3px;
+        }
+        
+        .message.error { background: rgba(255, 0, 0, 0.2); color: #ff6b6b; }
+        .message.syndrome { background: rgba(255, 165, 0, 0.2); color: #ffa500; }
+        .message.correction { background: rgba(0, 255, 0, 0.2); color: #00ff88; }
+        .message.measurement { background: rgba(0, 150, 255, 0.2); color: #0096ff; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="control-panel">
+            <h1>Quantum Communication Simulator</h1>
+            
+            <div class="section">
+                <h2>🚀 Simulation Mode</h2>
+                <button onclick="startIdleMode()" id="idle-btn" class="active">Idle State</button>
+                <button onclick="startErrorDetection()" id="error-btn">Error Detection</button>
+                <button onclick="startSyndromePropagation()" id="syndrome-btn">Syndrome Propagation</button>
+                <button onclick="startFullProtocol()" id="protocol-btn">Full QEC Protocol</button>
+                <button onclick="startGateCommunication()" id="gate-btn">Gate Communication</button>
+            </div>
+            
+            <div class="section">
+                <h2>⚡ Error Injection</h2>
+                <button onclick="injectError('X')">Inject X Error</button>
+                <button onclick="injectError('Y')">Inject Y Error</button>
+                <button onclick="injectError('Z')">Inject Z Error</button>
+                <button onclick="injectRandomError()">Random Error</button>
+            </div>
+            
+            <div class="section">
+                <h2>⚙️ Settings</h2>
+                <div class="slider-container">
+                    <label>Animation Speed: <span id="speed-value">1.0</span>x</label>
+                    <input type="range" id="speed-slider" min="0.1" max="3" value="1" step="0.1">
+                </div>
+                <div class="slider-container">
+                    <label>Error Rate: <span id="error-rate-value">0.1</span>%</label>
+                    <input type="range" id="error-rate-slider" min="0" max="5" value="0.1" step="0.1">
+                </div>
+                <button onclick="toggleMessageLog()">Toggle Message Log</button>
+                <button onclick="resetSimulation()">Reset Simulation</button>
+            </div>
+            
+            <div class="status-panel">
+                <h2>📊 System Status</h2>
+                <div class="status-item">
+                    <span class="status-label">Active Qubits:</span>
+                    <span class="status-value" id="active-qubits">25</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Detected Errors:</span>
+                    <span class="status-value" id="detected-errors">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Syndrome Bits:</span>
+                    <span class="status-value" id="syndrome-bits">0000</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Correction Applied:</span>
+                    <span class="status-value" id="corrections">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Protocol State:</span>
+                    <span class="status-value" id="protocol-state">IDLE</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="visualization">
+            <canvas id="canvas"></canvas>
+            
+            <div id="message-log"></div>
+            
+            <div class="info-overlay">
+                <h3 id="info-title">Welcome</h3>
+                <p id="info-content">
+                    This simulator demonstrates communication patterns in quantum error correction. 
+                    Watch how information flows between qubits, how errors are detected through 
+                    stabilizer measurements, and how correction protocols maintain quantum coherence.
+                </p>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #0096ff;"></div>
+                    <span>Data Qubit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Ancilla Qubit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00ff88;"></div>
+                    <span>Measurement</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffa500;"></div>
+                    <span>Error Detected</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff00ff;"></div>
+                    <span>Communication</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+        let particles = [];
+        let qubits = [];
+        let connections = [];
+        let messages = [];
+        let mode = 'idle';
+        let animationSpeed = 1;
+        let errorRate = 0.001;
+        let time = 0;
+        let detectedErrors = 0;
+        let corrections = 0;
+        let syndromeBits = [0, 0, 0, 0];
+        
+        // Quantum system configuration
+        const GRID_SIZE = 5;
+        const QUBIT_RADIUS = 15;
+        const ANCILLA_RADIUS = 12;
+        
+        // Initialize canvas
+        function initCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                initializeQubits();
+            });
+        }
+        
+        // Qubit class
+        class Qubit {
+            constructor(x, y, type = 'data', index = 0) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.index = index;
+                this.state = 'normal';
+                this.error = null;
+                this.measurement = 0;
+                this.pulsePhase = Math.random() * Math.PI * 2;
+                this.neighbors = [];
+                this.stabilizer = null;
+            }
+            
+            draw() {
+                ctx.save();
+                
+                // Glow effect
+                if (this.state !== 'normal') {
+                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 30);
+                    const glowColor = this.state === 'error' ? 'rgba(255, 100, 100, 0.3)' : 
+                                     this.state === 'measuring' ? 'rgba(0, 255, 136, 0.3)' :
+                                     'rgba(255, 165, 0, 0.3)';
+                    gradient.addColorStop(0, glowColor);
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x - 30, this.y - 30, 60, 60);
+                }
+                
+                // Main qubit
+                const radius = this.type === 'data' ? QUBIT_RADIUS : ANCILLA_RADIUS;
+                const pulse = Math.sin(time * 0.002 + this.pulsePhase) * 2;
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius + pulse, 0, Math.PI * 2);
+                
+                // Fill based on state and type
+                if (this.type === 'data') {
+                    ctx.fillStyle = this.state === 'error' ? '#ff6b6b' : '#0096ff';
+                } else {
+                    ctx.fillStyle = this.state === 'measuring' ? '#00ff88' : '#ff6b6b';
+                }
+                
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Inner details
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = 'white';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                if (this.type === 'data') {
+                    ctx.fillText(`Q${this.index}`, this.x, this.y);
+                } else {
+                    ctx.fillText(`A${this.index}`, this.x, this.y);
+                }
+                
+                // Error indicator
+                if (this.error) {
+                    ctx.font = 'bold 16px Arial';
+                    ctx.fillStyle = '#ffff00';
+                    ctx.fillText(this.error, this.x, this.y - radius - 10);
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // Message/Particle class for communication visualization
+        class Message {
+            constructor(from, to, type = 'measurement', data = null) {
+                this.from = from;
+                this.to = to;
+                this.type = type;
+                this.data = data;
+                this.progress = 0;
+                this.x = from.x;
+                this.y = from.y;
+                this.trail = [];
+                this.maxTrailLength = 20;
+            }
+            
+            update() {
+                this.progress += 0.02 * animationSpeed;
+                
+                if (this.progress >= 1) {
+                    this.onComplete();
+                    return false;
+                }
+                
+                // Smooth interpolation
+                const t = this.easeInOutCubic(this.progress);
+                this.x = this.from.x + (this.to.x - this.from.x) * t;
+                this.y = this.from.y + (this.to.y - this.from.y) * t;
+                
+                // Update trail
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+                
+                return true;
+            }
+            
+            easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+            
+            draw() {
+                // Draw trail
+                ctx.strokeStyle = this.getColor();
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.3;
+                
+                if (this.trail.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for (let i = 1; i < this.trail.length; i++) {
+                        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                    }
+                    ctx.stroke();
+                }
+                
+                ctx.globalAlpha = 1;
+                
+                // Draw message particle
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 10);
+                gradient.addColorStop(0, this.getColor());
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner bright core
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            getColor() {
+                switch(this.type) {
+                    case 'measurement': return '#00ff88';
+                    case 'syndrome': return '#ffa500';
+                    case 'error': return '#ff6b6b';
+                    case 'correction': return '#ff00ff';
+                    default: return '#0096ff';
+                }
+            }
+            
+            onComplete() {
+                // Log message
+                logMessage(`${this.type.toUpperCase()}: ${this.from.type}${this.from.index} → ${this.to.type}${this.to.index}`, this.type);
+                
+                // Handle different message types
+                switch(this.type) {
+                    case 'measurement':
+                        this.to.state = 'measuring';
+                        setTimeout(() => {
+                            this.to.state = 'normal';
+                            // Send syndrome if error detected
+                            if (this.from.error && Math.random() < 0.8) {
+                                messages.push(new Message(this.to, this.from, 'syndrome', 1));
+                                detectedErrors++;
+                            }
+                        }, 500 / animationSpeed);
+                        break;
+                        
+                    case 'syndrome':
+                        this.to.state = 'syndrome';
+                        syndromeBits[this.to.index % 4] = 1;
+                        setTimeout(() => {
+                            this.to.state = 'normal';
+                            // Trigger correction
+                            if (mode === 'protocol') {
+                                messages.push(new Message(this.to, this.from, 'correction', this.data));
+                            }
+                        }, 300 / animationSpeed);
+                        break;
+                        
+                    case 'correction':
+                        this.to.state = 'normal';
+                        this.to.error = null;
+                        corrections++;
+                        break;
+                }
+                
+                updateStatus();
+            }
+        }
+        
+        // Initialize qubit grid
+        function initializeQubits() {
+            qubits = [];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const spacing = 80;
+            
+            // Create data qubits
+            let index = 0;
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const x = centerX + (j - GRID_SIZE/2 + 0.5) * spacing;
+                    const y = centerY + (i - GRID_SIZE/2 + 0.5) * spacing;
+                    const qubit = new Qubit(x, y, 'data', index++);
+                    qubits.push(qubit);
+                }
+            }
+            
+            // Create ancilla qubits for stabilizers
+            index = 0;
+            for (let i = 0; i < GRID_SIZE - 1; i++) {
+                for (let j = 0; j < GRID_SIZE - 1; j++) {
+                    const x = centerX + (j - GRID_SIZE/2 + 1) * spacing;
+                    const y = centerY + (i - GRID_SIZE/2 + 1) * spacing;
+                    const ancilla = new Qubit(x, y, 'ancilla', index++);
+                    
+                    // Connect to neighboring data qubits
+                    const neighbors = [];
+                    const dataIndex = i * GRID_SIZE + j;
+                    neighbors.push(qubits[dataIndex]);
+                    neighbors.push(qubits[dataIndex + 1]);
+                    neighbors.push(qubits[dataIndex + GRID_SIZE]);
+                    neighbors.push(qubits[dataIndex + GRID_SIZE + 1]);
+                    
+                    ancilla.neighbors = neighbors;
+                    neighbors.forEach(n => n.stabilizer = ancilla);
+                    
+                    qubits.push(ancilla);
+                }
+            }
+        }
+        
+        // Draw connections between qubits
+        function drawConnections() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            qubits.filter(q => q.type === 'ancilla').forEach(ancilla => {
+                ancilla.neighbors.forEach(neighbor => {
+                    ctx.beginPath();
+                    ctx.moveTo(ancilla.x, ancilla.y);
+                    ctx.lineTo(neighbor.x, neighbor.y);
+                    ctx.stroke();
+                });
+            });
+        }
+        
+        // Animation modes
+        function startIdleMode() {
+            mode = 'idle';
+            setActiveButton('idle-btn');
+            messages = [];
+            updateInfo('Idle State', 'The quantum system is in a stable state. Data qubits (blue) store quantum information while ancilla qubits (red) are ready to perform measurements.');
+        }
+        
+        function startErrorDetection() {
+            mode = 'error-detection';
+            setActiveButton('error-btn');
+            messages = [];
+            updateInfo('Error Detection', 'Ancilla qubits continuously measure stabilizers to detect errors. When an error occurs on a data qubit, nearby ancillas detect the disturbance.');
+            
+            // Continuous measurement cycle
+            const measurementCycle = () => {
+                if (mode === 'error-detection') {
+                    qubits.filter(q => q.type === 'ancilla').forEach((ancilla, i) => {
+                        setTimeout(() => {
+                            ancilla.neighbors.forEach(neighbor => {
+                                messages.push(new Message(ancilla, neighbor, 'measurement'));
+                            });
+                        }, i * 100);
+                    });
+                    setTimeout(measurementCycle, 3000 / animationSpeed);
+                }
+            };
+            measurementCycle();
+        }
+        
+        function startSyndromePropagation() {
+            mode = 'syndrome';
+            setActiveButton('syndrome-btn');
+            messages = [];
+            updateInfo('Syndrome Propagation', 'When errors are detected, syndrome information propagates through the system. This creates a pattern that identifies the error location.');
+            
+            // Simulate syndrome extraction and propagation
+            const syndromeCycle = () => {
+                if (mode === 'syndrome') {
+                    // Find qubits with errors
+                    const errorQubits = qubits.filter(q => q.type === 'data' && q.error);
+                    errorQubits.forEach(eq => {
+                        if (eq.stabilizer) {
+                            messages.push(new Message(eq.stabilizer, eq, 'measurement'));
+                        }
+                    });
+                    setTimeout(syndromeCycle, 2000 / animationSpeed);
+                }
+            };
+            syndromeCycle();
+        }
+        
+        function startFullProtocol() {
+            mode = 'protocol';
+            setActiveButton('protocol-btn');
+            messages = [];
+            updateInfo('Full QEC Protocol', 'The complete quantum error correction cycle: continuous measurement, error detection, syndrome extraction, and automatic correction.');
+            
+            // Full QEC cycle
+            const protocolCycle = () => {
+                if (mode === 'protocol') {
+                    // Measurement round
+                    qubits.filter(q => q.type === 'ancilla').forEach((ancilla, i) => {
+                        setTimeout(() => {
+                            ancilla.neighbors.forEach(neighbor => {
+                                messages.push(new Message(ancilla, neighbor, 'measurement'));
+                            });
+                        }, i * 50);
+                    });
+                    
+                    // Random error injection
+                    if (Math.random() < errorRate * 10) {
+                        setTimeout(() => injectRandomError(), 1000 / animationSpeed);
+                    }
+                    
+                    setTimeout(protocolCycle, 4000 / animationSpeed);
+                }
+            };
+            protocolCycle();
+        }
+        
+        function startGateCommunication() {
+            mode = 'gate';
+            setActiveButton('gate-btn');
+            messages = [];
+            updateInfo('Gate Communication', 'Visualization of three-qubit CZZ gates. Notice how multiple qubits communicate simultaneously, reducing the total operation time.');
+            
+            // Gate operation visualization
+            const gateCycle = () => {
+                if (mode === 'gate') {
+                    qubits.filter(q => q.type === 'ancilla').forEach((ancilla, i) => {
+                        setTimeout(() => {
+                            // CZZ gate - simultaneous communication
+                            const targets = ancilla.neighbors.filter((n, idx) => idx === 0 || idx === 3); // Diagonal
+                            targets.forEach(target => {
+                                messages.push(new Message(ancilla, target, 'measurement'));
+                                messages.push(new Message(target, ancilla, 'measurement'));
+                            });
+                        }, i * 200);
+                    });
+                    setTimeout(gateCycle, 3000 / animationSpeed);
+                }
+            };
+            gateCycle();
+        }
+        
+        // Error injection
+        function injectError(type) {
+            const dataQubits = qubits.filter(q => q.type === 'data' && !q.error);
+            if (dataQubits.length > 0) {
+                const target = dataQubits[Math.floor(Math.random() * dataQubits.length)];
+                target.error = type;
+                target.state = 'error';
+                logMessage(`ERROR: ${type} error on Q${target.index}`, 'error');
+                
+                // Clear after some time if in idle mode
+                if (mode === 'idle') {
+                    setTimeout(() => {
+                        target.error = null;
+                        target.state = 'normal';
+                    }, 3000);
+                }
+            }
+        }
+        
+        function injectRandomError() {
+            const types = ['X', 'Y', 'Z'];
+            injectError(types[Math.floor(Math.random() * types.length)]);
+        }
+        
+        // UI functions
+        function setActiveButton(btnId) {
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+        }
+        
+        function updateInfo(title, content) {
+            document.getElementById('info-title').textContent = title;
+            document.getElementById('info-content').textContent = content;
+            document.getElementById('protocol-state').textContent = mode.toUpperCase();
+        }
+        
+        function updateStatus() {
+            document.getElementById('active-qubits').textContent = qubits.length;
+            document.getElementById('detected-errors').textContent = detectedErrors;
+            document.getElementById('syndrome-bits').textContent = syndromeBits.join('');
+            document.getElementById('corrections').textContent = corrections;
+        }
+        
+        function logMessage(text, type) {
+            const log = document.getElementById('message-log');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            log.appendChild(message);
+            log.scrollTop = log.scrollHeight;
+            
+            // Keep only last 50 messages
+            while (log.children.length > 50) {
+                log.removeChild(log.firstChild);
+            }
+        }
+        
+        function toggleMessageLog() {
+            const log = document.getElementById('message-log');
+            log.style.display = log.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function resetSimulation() {
+            messages = [];
+            detectedErrors = 0;
+            corrections = 0;
+            syndromeBits = [0, 0, 0, 0];
+            qubits.forEach(q => {
+                q.state = 'normal';
+                q.error = null;
+            });
+            updateStatus();
+            document.getElementById('message-log').innerHTML = '';
+            logMessage('Simulation reset', 'measurement');
+        }
+        
+        // Event listeners
+        document.getElementById('speed-slider').addEventListener('input', (e) => {
+            animationSpeed = parseFloat(e.target.value);
+            document.getElementById('speed-value').textContent = animationSpeed.toFixed(1);
+        });
+        
+        document.getElementById('error-rate-slider').addEventListener('input', (e) => {
+            errorRate = parseFloat(e.target.value) / 100;
+            document.getElementById('error-rate-value').textContent = e.target.value;
+        });
+        
+        // Main animation loop
+        function animate() {
+            time += animationSpeed;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw connections
+            drawConnections();
+            
+            // Update and draw messages
+            messages = messages.filter(msg => {
+                const alive = msg.update();
+                if (alive) msg.draw();
+                return alive;
+            });
+            
+            // Draw qubits
+            qubits.forEach(qubit => qubit.draw());
+            
+            // Draw active stabilizer highlights
+            if (mode === 'gate' || mode === 'protocol') {
+                ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+                ctx.lineWidth = 3;
+                qubits.filter(q => q.type === 'ancilla' && q.state === 'measuring').forEach(ancilla => {
+                    ancilla.neighbors.forEach(neighbor => {
+                        ctx.beginPath();
+                        ctx.moveTo(ancilla.x, ancilla.y);
+                        ctx.lineTo(neighbor.x, neighbor.y);
+                        ctx.stroke();
+                    });
+                });
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        initCanvas();
+        initializeQubits();
+        animate();
+        updateStatus();
+        logMessage('Quantum Communication Simulator initialized', 'measurement');
+    </script>
+</body>
+</html>

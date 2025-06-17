@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Error Correction Computational Model</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        #controls {
+            width: 400px;
+            background: linear-gradient(180deg, #0a0a14 0%, #14141f 100%);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #4a90e2;
+        }
+        
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 26px;
+            margin: 0 0 20px 0;
+            background: linear-gradient(45deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        .section {
+            background: rgba(40, 40, 80, 0.4);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(100, 100, 200, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section h3 {
+            margin: 0 0 10px 0;
+            color: #00d4ff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #0099ff, #0066cc);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 153, 255, 0.4);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+        }
+        
+        button.danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .quantum-state {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #0099ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .state-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .state-label {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .state-value {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .syndrome-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .syndrome-bit {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .syndrome-bit.active {
+            border-color: #ffa500;
+            background: rgba(255, 165, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+        }
+        
+        .syndrome-bit .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .syndrome-bit .label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        #computation-log {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0099ff;
+            border-radius: 8px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin: 3px 0;
+            padding: 3px 5px;
+            border-radius: 3px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .log-measurement { color: #00ff88; }
+        .log-error { color: #ff6666; background: rgba(255, 0, 0, 0.1); }
+        .log-syndrome { color: #ffa500; }
+        .log-correction { color: #ff00ff; }
+        .log-success { color: #00ff88; background: rgba(0, 255, 0, 0.1); }
+        
+        #metrics-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 40, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #0099ff;
+            backdrop-filter: blur(10px);
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            min-width: 200px;
+        }
+        
+        .metric-label {
+            color: #aaa;
+        }
+        
+        .metric-value {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0099ff, #00ff88);
+            transition: width 0.3s;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 40, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0099ff;
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            border: 1px solid #444;
+        }
+        
+        .highlight {
+            color: #ffa500;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="controls">
+            <h1>QEC Computational Model</h1>
+            
+            <div class="section">
+                <h3>🚀 Simulation Control</h3>
+                <button onclick="startSimulation()" id="start-btn">▶ Start QEC Cycle</button>
+                <button onclick="pauseSimulation()" id="pause-btn">⏸ Pause</button>
+                <button onclick="resetSimulation()" class="danger">🔄 Reset System</button>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="cycle-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>⚡ Error Injection</h3>
+                <p style="font-size: 14px; color: #aaa; margin: 0 0 10px 0;">
+                    Inject errors to test correction
+                </p>
+                <div class="button-grid">
+                    <button onclick="injectError('X', null)">X Error</button>
+                    <button onclick="injectError('Y', null)">Y Error</button>
+                    <button onclick="injectError('Z', null)">Z Error</button>
+                    <button onclick="injectRandomErrors()">Random</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>📊 Quantum State</h3>
+                <div class="quantum-state">
+                    <div class="state-item">
+                        <span class="state-label">Code Distance:</span>
+                        <span class="state-value" id="code-distance">3</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Active Errors:</span>
+                        <span class="state-value" id="active-errors">0</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">QEC Cycles:</span>
+                        <span class="state-value" id="qec-cycles">0</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Success Rate:</span>
+                        <span class="state-value" id="success-rate">100%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🔍 Syndrome Extraction</h3>
+                <div class="syndrome-display">
+                    <div class="syndrome-bit" id="syndrome-0">
+                        <div class="value">0</div>
+                        <div class="label">S₀</div>
+                    </div>
+                    <div class="syndrome-bit" id="syndrome-1">
+                        <div class="value">0</div>
+                        <div class="label">S₁</div>
+                    </div>
+                    <div class="syndrome-bit" id="syndrome-2">
+                        <div class="value">0</div>
+                        <div class="label">S₂</div>
+                    </div>
+                    <div class="syndrome-bit" id="syndrome-3">
+                        <div class="value">0</div>
+                        <div class="label">S₃</div>
+                    </div>
+                </div>
+                <div class="formula">
+                    Syndrome: s = HE<sup>T</sup>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>💻 Computation Log</h3>
+                <div id="computation-log"></div>
+            </div>
+        </div>
+        
+        <div id="canvas-container">
+            <div id="metrics-display">
+                <h3 style="margin: 0 0 15px 0; color: #00d4ff;">Performance Metrics</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Gate Type:</span>
+                    <span class="metric-value" id="gate-type">CZZ (3-qubit)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Timesteps/Cycle:</span>
+                    <span class="metric-value" id="timesteps">2</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Errors Corrected:</span>
+                    <span class="metric-value" id="errors-corrected">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Logical Error Rate:</span>
+                    <span class="metric-value" id="logical-error-rate">0.000</span>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4a90e2;"></div>
+                    <span>Data Qubit (|0⟩)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6666;"></div>
+                    <span>Error State</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e94560;"></div>
+                    <span>Ancilla Qubit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00ff88;"></div>
+                    <span>Measurement</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffa500;"></div>
+                    <span>Syndrome Detection</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff00ff;"></div>
+                    <span>Correction Applied</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Quantum System State
+        class QuantumSystem {
+            constructor() {
+                this.codeDistance = 3;
+                this.numDataQubits = 9;
+                this.numAncillaQubits = 4;
+                this.dataQubits = new Array(this.numDataQubits).fill(0);
+                this.errors = new Map(); // qubit index -> error type
+                this.syndrome = [0, 0, 0, 0];
+                this.cycles = 0;
+                this.successfulCorrections = 0;
+                this.totalErrors = 0;
+                
+                // Parity check matrix for surface code
+                this.setupParityCheckMatrix();
+            }
+            
+            setupParityCheckMatrix() {
+                // Simplified parity check matrix for distance-3 surface code
+                // Each row represents a stabilizer, each column a data qubit
+                this.H = [
+                    [1, 1, 0, 1, 1, 0, 0, 0, 0], // Z-stabilizer 0
+                    [0, 1, 1, 0, 1, 1, 0, 0, 0], // Z-stabilizer 1
+                    [0, 0, 0, 1, 1, 0, 1, 1, 0], // Z-stabilizer 2
+                    [0, 0, 0, 0, 1, 1, 0, 1, 1]  // Z-stabilizer 3
+                ];
+                
+                // Logical operators
+                this.logicalZ = [1, 0, 0, 1, 0, 0, 1, 0, 0];
+                this.logicalX = [1, 1, 1, 0, 0, 0, 0, 0, 0];
+            }
+            
+            injectError(type, position = null) {
+                if (position === null) {
+                    position = Math.floor(Math.random() * this.numDataQubits);
+                }
+                
+                this.errors.set(position, type);
+                this.totalErrors++;
+                
+                logComputation(`ERROR: ${type} error injected at qubit ${position}`, 'error');
+                return position;
+            }
+            
+            measureStabilizers() {
+                // Reset syndrome
+                this.syndrome = [0, 0, 0, 0];
+                
+                // Calculate syndrome based on errors
+                this.errors.forEach((errorType, qubitIndex) => {
+                    if (errorType === 'Z' || errorType === 'Y') {
+                        // Z and Y errors are detected by X-stabilizers
+                        for (let s = 0; s < 4; s++) {
+                            if (this.H[s][qubitIndex] === 1) {
+                                this.syndrome[s] ^= 1;
+                            }
+                        }
+                    }
+                });
+                
+                logComputation(`SYNDROME: [${this.syndrome.join(', ')}]`, 'syndrome');
+                return this.syndrome;
+            }
+            
+            decodeAndCorrect() {
+                // Simple lookup table decoder for distance-3 code
+                const syndromeString = this.syndrome.join('');
+                const correctionMap = {
+                    '1100': 0,  // Error on qubit 0
+                    '1010': 1,  // Error on qubit 1
+                    '0110': 2,  // Error on qubit 2
+                    '1001': 3,  // Error on qubit 3
+                    '1111': 4,  // Error on qubit 4
+                    '0011': 5,  // Error on qubit 5
+                    '0101': 6,  // Error on qubit 6
+                    '0111': 7,  // Error on qubit 7
+                    '0001': 8   // Error on qubit 8
+                };
+                
+                if (syndromeString === '0000') {
+                    logComputation('NO ERRORS DETECTED', 'success');
+                    return null;
+                }
+                
+                const errorLocation = correctionMap[syndromeString];
+                if (errorLocation !== undefined) {
+                    const errorType = this.errors.get(errorLocation);
+                    this.errors.delete(errorLocation);
+                    this.successfulCorrections++;
+                    
+                    logComputation(`CORRECTION: Applied ${errorType} correction to qubit ${errorLocation}`, 'correction');
+                    return { location: errorLocation, type: errorType };
+                } else {
+                    logComputation(`DECODER FAILURE: Unknown syndrome ${syndromeString}`, 'error');
+                    return null;
+                }
+            }
+            
+            runQECCycle() {
+                this.cycles++;
+                logComputation(`=== QEC CYCLE ${this.cycles} START ===`, 'measurement');
+                
+                // Step 1: Measure stabilizers
+                const syndrome = this.measureStabilizers();
+                
+                // Step 2: Decode syndrome
+                const correction = this.decodeAndCorrect();
+                
+                // Step 3: Check logical error
+                const hasLogicalError = this.checkLogicalError();
+                
+                logComputation(`=== QEC CYCLE ${this.cycles} END ===`, 'measurement');
+                
+                return {
+                    syndrome,
+                    correction,
+                    hasLogicalError,
+                    success: correction !== null || syndrome.every(s => s === 0)
+                };
+            }
+            
+            checkLogicalError() {
+                // Check if remaining errors form a logical operator
+                let errorVector = new Array(this.numDataQubits).fill(0);
+                this.errors.forEach((type, index) => {
+                    errorVector[index] = 1;
+                });
+                
+                // Check commutation with logical operators
+                const commuteWithLogicalZ = errorVector.reduce((sum, e, i) => sum + e * this.logicalZ[i], 0) % 2;
+                const commuteWithLogicalX = errorVector.reduce((sum, e, i) => sum + e * this.logicalX[i], 0) % 2;
+                
+                return commuteWithLogicalZ === 1 || commuteWithLogicalX === 1;
+            }
+            
+            getSuccessRate() {
+                if (this.totalErrors === 0) return 100;
+                return Math.round((this.successfulCorrections / this.totalErrors) * 100);
+            }
+        }
+        
+        // Global variables
+        let scene, camera, renderer;
+        let quantumSystem;
+        let visualElements = {};
+        let isSimulating = false;
+        let simulationStep = 0;
+        let cycleProgress = 0;
+        
+        // Initialize Three.js
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a14);
+            scene.fog = new THREE.Fog(0x0a0a14, 30, 100);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                60,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(15, 20, 25);
+            camera.lookAt(0, 0, 0);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404080, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0x00d4ff, 0.5, 30);
+            pointLight1.position.set(-10, 10, -10);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0xff6666, 0.3, 30);
+            pointLight2.position.set(10, 10, 10);
+            scene.add(pointLight2);
+            
+            // Initialize quantum system
+            quantumSystem = new QuantumSystem();
+            
+            // Create visualization
+            createVisualization();
+            
+            // Setup controls
+            setupMouseControls();
+            
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation
+            animate();
+        }
+        
+        function createVisualization() {
+            visualElements.dataQubits = [];
+            visualElements.ancillaQubits = [];
+            visualElements.connections = [];
+            
+            // Create surface code lattice
+            const latticeGroup = new THREE.Group();
+            
+            // Data qubits (3x3 grid)
+            const spacing = 4;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const index = i * 3 + j;
+                    
+                    const geometry = new THREE.SphereGeometry(0.8, 32, 32);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0x4a90e2,
+                        emissive: 0x4a90e2,
+                        emissiveIntensity: 0.2
+                    });
+                    
+                    const qubit = new THREE.Mesh(geometry, material);
+                    qubit.position.set(
+                        (j - 1) * spacing,
+                        0,
+                        (i - 1) * spacing
+                    );
+                    qubit.castShadow = true;
+                    qubit.receiveShadow = true;
+                    qubit.userData = { 
+                        type: 'data', 
+                        index: index,
+                        originalColor: 0x4a90e2,
+                        hasError: false
+                    };
+                    
+                    // Add qubit label
+                    const canvas = createTextCanvas(`Q${index}`, 64, 'white');
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+                    const sprite = new THREE.Sprite(spriteMaterial);
+                    sprite.scale.set(2, 1, 1);
+                    sprite.position.y = 2;
+                    qubit.add(sprite);
+                    
+                    visualElements.dataQubits.push(qubit);
+                    latticeGroup.add(qubit);
+                }
+            }
+            
+            // Ancilla qubits (2x2 grid in plaquette centers)
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 2; j++) {
+                    const index = i * 2 + j;
+                    
+                    const geometry = new THREE.OctahedronGeometry(0.7);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0xe94560,
+                        emissive: 0xe94560,
+                        emissiveIntensity: 0.3
+                    });
+                    
+                    const ancilla = new THREE.Mesh(geometry, material);
+                    ancilla.position.set(
+                        (j - 0.5) * spacing,
+                        3,
+                        (i - 0.5) * spacing
+                    );
+                    ancilla.castShadow = true;
+                    ancilla.receiveShadow = true;
+                    ancilla.userData = { 
+                        type: 'ancilla', 
+                        index: index,
+                        connectedQubits: getConnectedQubits(index)
+                    };
+                    
+                    visualElements.ancillaQubits.push(ancilla);
+                    latticeGroup.add(ancilla);
+                }
+            }
+            
+            // Add grid base
+            const gridHelper = new THREE.GridHelper(12, 6, 0x404080, 0x202040);
+            gridHelper.position.y = -0.5;
+            latticeGroup.add(gridHelper);
+            
+            scene.add(latticeGroup);
+            
+            // Create stabilizer plaquettes
+            createStabilizerPlaquettes();
+        }
+        
+        function getConnectedQubits(ancillaIndex) {
+            // Map ancilla to its 4 neighboring data qubits
+            const connections = [
+                [0, 1, 3, 4], // Ancilla 0
+                [1, 2, 4, 5], // Ancilla 1
+                [3, 4, 6, 7], // Ancilla 2
+                [4, 5, 7, 8]  // Ancilla 3
+            ];
+            return connections[ancillaIndex];
+        }
+        
+        function createStabilizerPlaquettes() {
+            visualElements.ancillaQubits.forEach((ancilla, index) => {
+                const plaquetteGeometry = new THREE.PlaneGeometry(3.5, 3.5);
+                const plaquetteMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x6b9fff,
+                    opacity: 0.2,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                
+                const plaquette = new THREE.Mesh(plaquetteGeometry, plaquetteMaterial);
+                plaquette.rotation.x = -Math.PI / 2;
+                plaquette.position.copy(ancilla.position);
+                plaquette.position.y = -0.3;
+                
+                scene.add(plaquette);
+            });
+        }
+        
+        function createTextCanvas(text, size, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 64;
+            const context = canvas.getContext('2d');
+            
+            context.fillStyle = color;
+            context.font = `${size}px Arial`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, 64, 32);
+            
+            return canvas;
+        }
+        
+        function setupMouseControls() {
+            const container = document.getElementById('canvas-container');
+            let mouseDown = false;
+            let mouseX = 0, mouseY = 0;
+            
+            container.addEventListener('mousedown', () => mouseDown = true);
+            container.addEventListener('mouseup', () => mouseDown = false);
+            container.addEventListener('mouseleave', () => mouseDown = false);
+            
+            container.addEventListener('mousemove', (event) => {
+                if (!mouseDown) return;
+                
+                const deltaX = event.movementX;
+                const deltaY = event.movementY;
+                
+                // Rotate camera around center
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 0, 0);
+            });
+            
+            container.addEventListener('wheel', (event) => {
+                const delta = event.deltaY * 0.05;
+                const distance = camera.position.length();
+                const newDistance = distance + delta;
+                
+                if (newDistance > 10 && newDistance < 50) {
+                    camera.position.multiplyScalar(newDistance / distance);
+                }
+            });
+        }
+        
+        // Simulation functions
+        async function startSimulation() {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            document.getElementById('start-btn').textContent = '⏹ Stop';
+            
+            while (isSimulating) {
+                await runQECCycle();
+                await sleep(2000 / animationSpeed);
+            }
+        }
+        
+        function pauseSimulation() {
+            isSimulating = false;
+            document.getElementById('start-btn').textContent = '▶ Start QEC Cycle';
+        }
+        
+        async function runQECCycle() {
+            // Step 1: Initialize cycle
+            cycleProgress = 0;
+            updateProgress(0);
+            
+            // Step 2: Measure stabilizers (CZZ gates)
+            await measureStabilizersVisual();
+            updateProgress(33);
+            
+            // Step 3: Extract syndrome
+            quantumSystem.measureStabilizers();
+            updateSyndromeDisplay();
+            updateProgress(66);
+            
+            // Step 4: Decode and correct
+            const correction = quantumSystem.decodeAndCorrect();
+            if (correction) {
+                await applyCorrection(correction);
+            }
+            updateProgress(100);
+            
+            // Update metrics
+            updateMetrics();
+        }
+        
+        async function measureStabilizersVisual() {
+            // Simulate CZZ gate measurements
+            for (let timestep = 0; timestep < 2; timestep++) {
+                const ancillaIndices = timestep === 0 ? [0, 3] : [1, 2];
+                
+                for (const ancillaIndex of ancillaIndices) {
+                    const ancilla = visualElements.ancillaQubits[ancillaIndex];
+                    const connectedQubits = ancilla.userData.connectedQubits;
+                    
+                    // CZZ connects to diagonal qubits
+                    const targetIndices = [connectedQubits[0], connectedQubits[3]];
+                    
+                    for (const qubitIndex of targetIndices) {
+                        await createMeasurementBeam(ancilla, visualElements.dataQubits[qubitIndex]);
+                    }
+                }
+                
+                await sleep(500);
+            }
+        }
+        
+        async function createMeasurementBeam(ancilla, dataQubit) {
+            const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x00ff88,
+                emissive: 0x00ff88,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const beam = new THREE.Mesh(geometry, material);
+            
+            const start = ancilla.position;
+            const end = dataQubit.position;
+            const distance = start.distanceTo(end);
+            
+            beam.scale.y = distance;
+            beam.position.lerpVectors(start, end, 0.5);
+            beam.lookAt(end);
+            beam.rotateX(Math.PI / 2);
+            
+            scene.add(beam);
+            
+            // Animate and remove
+            const startTime = Date.now();
+            const animateBeam = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / 300;
+                
+                if (progress < 1) {
+                    beam.material.opacity = 0.8 * (1 - progress);
+                    beam.scale.x = beam.scale.z = 1 + progress;
+                    requestAnimationFrame(animateBeam);
+                } else {
+                    scene.remove(beam);
+                    beam.geometry.dispose();
+                    beam.material.dispose();
+                }
+            };
+            
+            animateBeam();
+        }
+        
+        async function applyCorrection(correction) {
+            const qubit = visualElements.dataQubits[correction.location];
+            
+            // Visual correction effect
+            const correctionGeometry = new THREE.TorusGeometry(1.5, 0.3, 16, 32);
+            const correctionMaterial = new THREE.MeshPhongMaterial({
+                color: 0xff00ff,
+                emissive: 0xff00ff,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const correctionRing = new THREE.Mesh(correctionGeometry, correctionMaterial);
+            correctionRing.position.copy(qubit.position);
+            scene.add(correctionRing);
+            
+            // Animate correction
+            const startTime = Date.now();
+            const animateCorrection = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / 1000;
+                
+                if (progress < 1) {
+                    correctionRing.scale.set(1 + progress, 1 + progress, 1);
+                    correctionRing.material.opacity = 0.8 * (1 - progress);
+                    correctionRing.rotation.z = progress * Math.PI * 2;
+                    requestAnimationFrame(animateCorrection);
+                } else {
+                    scene.remove(correctionRing);
+                    correctionRing.geometry.dispose();
+                    correctionRing.material.dispose();
+                    
+                    // Reset qubit color
+                    qubit.material.color.setHex(0x4a90e2);
+                    qubit.material.emissive.setHex(0x4a90e2);
+                    qubit.userData.hasError = false;
+                }
+            };
+            
+            animateCorrection();
+        }
+        
+        // Control functions
+        function injectError(type, position) {
+            const qubitIndex = quantumSystem.injectError(type, position);
+            
+            // Visual indication
+            const qubit = visualElements.dataQubits[qubitIndex];
+            qubit.material.color.setHex(0xff6666);
+            qubit.material.emissive.setHex(0xff6666);
+            qubit.material.emissiveIntensity = 0.5;
+            qubit.userData.hasError = true;
+            
+            updateStatus();
+        }
+        
+        function injectRandomErrors() {
+            const numErrors = Math.floor(Math.random() * 2) + 1;
+            const errorTypes = ['X', 'Y', 'Z'];
+            
+            for (let i = 0; i < numErrors; i++) {
+                const type = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+                injectError(type, null);
+            }
+        }
+        
+        function resetSimulation() {
+            pauseSimulation();
+            
+            // Reset quantum system
+            quantumSystem = new QuantumSystem();
+            
+            // Reset visuals
+            visualElements.dataQubits.forEach(qubit => {
+                qubit.material.color.setHex(0x4a90e2);
+                qubit.material.emissive.setHex(0x4a90e2);
+                qubit.material.emissiveIntensity = 0.2;
+                qubit.userData.hasError = false;
+            });
+            
+            // Clear log
+            document.getElementById('computation-log').innerHTML = '';
+            
+            // Reset displays
+            updateStatus();
+            updateSyndromeDisplay();
+            updateMetrics();
+            updateProgress(0);
+            
+            logComputation('System reset', 'success');
+        }
+        
+        // UI update functions
+        function updateStatus() {
+            document.getElementById('active-errors').textContent = quantumSystem.errors.size;
+            document.getElementById('qec-cycles').textContent = quantumSystem.cycles;
+            document.getElementById('success-rate').textContent = quantumSystem.getSuccessRate() + '%';
+        }
+        
+        function updateSyndromeDisplay() {
+            quantumSystem.syndrome.forEach((bit, index) => {
+                const element = document.getElementById(`syndrome-${index}`);
+                element.querySelector('.value').textContent = bit;
+                element.classList.toggle('active', bit === 1);
+            });
+        }
+        
+        function updateMetrics() {
+            document.getElementById('errors-corrected').textContent = quantumSystem.successfulCorrections;
+            
+            const errorRate = quantumSystem.totalErrors > 0 ? 
+                (1 - quantumSystem.successfulCorrections / quantumSystem.totalErrors).toFixed(3) : 
+                '0.000';
+            document.getElementById('logical-error-rate').textContent = errorRate;
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('cycle-progress').style.width = percent + '%';
+        }
+        
+        function logComputation(message, type = 'info') {
+            const log = document.getElementById('computation-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            
+            // Keep only last 100 entries
+            while (log.children.length > 100) {
+                log.removeChild(log.firstChild);
+            }
+        }
+        
+        // Utility functions
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        // Animation
+        let animationSpeed = 1;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animate elements
+            visualElements.ancillaQubits.forEach((ancilla, i) => {
+                ancilla.rotation.y += 0.01 * animationSpeed;
+                ancilla.position.y = 3 + Math.sin(Date.now() * 0.001 + i * Math.PI / 2) * 0.2;
+            });
+            
+            visualElements.dataQubits.forEach((qubit, i) => {
+                if (!qubit.userData.hasError) {
+                    const phase = i * Math.PI / 4;
+                    qubit.position.y = Math.sin(Date.now() * 0.0005 + phase) * 0.1;
+                }
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
